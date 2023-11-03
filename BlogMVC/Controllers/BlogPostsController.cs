@@ -4,8 +4,6 @@ using BlogMVC.Data;
 using BlogMVC.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using System.Xml.Linq;
-using Microsoft.Extensions.Hosting;
 
 namespace BlogMVC.Controllers
 {
@@ -124,8 +122,6 @@ namespace BlogMVC.Controllers
         }
 
         // POST: BlogPosts/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Title,Text,CategoryName,Date,AuthorId")] BlogPostCreateViewModel blogPost)
@@ -204,8 +200,6 @@ namespace BlogMVC.Controllers
         }
 
         // POST: BlogPosts/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Text,CategoryName,Date,AuthorId")] BlogPostCreateViewModel blogPost)

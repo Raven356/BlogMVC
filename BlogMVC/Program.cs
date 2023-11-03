@@ -1,16 +1,18 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using BlogMVC.Data;
 using BlogMVC.Models;
 using Microsoft.AspNetCore.Identity;
+using BlogMVC.BLL.Context;
+using BlogMVC.BLL;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<BlogMVCContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("BlogMVCContext") ?? throw new InvalidOperationException("Connection string 'BlogMVCContext' not found.")));
+Startup.Configure(builder.Services);
 
 // Add services to the container.
-builder.Services.AddIdentity<User, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<BlogMVCContext>();
+//builder.Services.AddIdentity<User, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+//    .AddEntityFrameworkStores<BlogMVCContext>();
 builder.Services.AddControllersWithViews();
 
 builder.Services.Configure<IdentityOptions>(options =>

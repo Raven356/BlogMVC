@@ -5,40 +5,31 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using BlogMVC.Data;
 using BlogMVC.Models;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
+using BlogMVC.BLL.Context;
+using System.Drawing.Text;
+using MediatR;
+using BlogMVC.BLL.AuthorsOperations.GetAuthorById;
+using BlogMVC.BLL.Models;
+using BlogMVC.BLL.AuthorsOperations.CreateAuthor;
 
 namespace BlogMVC.Controllers
 {
     public class AuthorsController : Controller
     {
-        private readonly BlogMVCContext _context;
-        private readonly UserManager<User> _userManager;
+        private readonly IMediator _mediator;
 
-        public AuthorsController(BlogMVCContext context, UserManager<User> userManager)
+        public AuthorsController(IMediator mediator)
         {
-            _context = context;
-            _userManager = userManager;
+            _mediator = mediator;
         }
 
         // GET: Authors/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Author == null)
-            {
-                return NotFound();
-            }
-
-            var author = await _context.Author
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (author == null)
-            {
-                return NotFound();
-            }
-
-            author.User = await _context.User.FindAsync(author.UserId);
+            var author = await _mediator.Send(new GetAuthorByIdRequest { Id = id });
 
             return View(author);
         }
@@ -58,11 +49,10 @@ namespace BlogMVC.Controllers
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 author.UserId = userId;
-                _context.Add(author);
-                await _context.SaveChangesAsync();
+                await _mediator.Send(new CreateAuthorCommand { Author = author });
                 return RedirectToAction("Create", "BlogPosts");
             }
-            ViewData["UserId"] = new SelectList(_context.Set<User>(), "Id", "Id", author.UserId);
+            //ViewData["UserId"] = new SelectList(_context.Set<User>(), "Id", "Id", author.UserId);
             return View(author);
         }
     }

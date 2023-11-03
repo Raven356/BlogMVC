@@ -1,7 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Identity;
-@inject UserManager<User> UserManager;
+@inject UserManager<BlogMVC.BLL.Models.User> UserManager;
 
-@model IEnumerable<BlogMVC.Models.BlogPost>
+@model IEnumerable<BlogMVC.BLL.Models.BlogPost>
 
 @{
     ViewData["Title"] = "My fancy Blog MVC";

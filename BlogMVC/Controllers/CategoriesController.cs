@@ -5,30 +5,25 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using BlogMVC.Data;
 using BlogMVC.Models;
+using MediatR;
+using BlogMVC.BLL.CategoriesOperations;
 
 namespace BlogMVC.Controllers
 {
     public class CategoriesController : Controller
     {
-        private readonly BlogMVCContext _context;
+        private readonly IMediator _mediator;
 
-        public CategoriesController(BlogMVCContext context)
+        public CategoriesController(IMediator mediator)
         {
-            _context = context;
+            _mediator = mediator;
         }
 
         // GET: Categories/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Category == null)
-            {
-                return NotFound();
-            }
-
-            var category = await _context.Category
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var category = _mediator.Send(new GetCategoriesByIdRequest { Id = id });
             if (category == null)
             {
                 return NotFound();

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace BlogMVC.Models
+namespace BlogMVC.BLL.Models
 {
     public class BlogPostCreateViewModel
     {

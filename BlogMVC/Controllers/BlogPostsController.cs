@@ -1,78 +1,45 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using BlogMVC.Data;
 using BlogMVC.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using BlogMVC.BLL.Context;
+using MediatR;
+using BlogMVC.BLL.BlogPostOperations;
+using BlogMVC.BLL.BlogPostOperations.GetBlogPostsById;
+using BlogMVC.BLL.BlogPostOperations.GetAllBlogPosts;
+using BlogMVC.BLL.Models;
+using BlogMVC.BLL.BlogPostOperations.AddNewComment;
+using BlogMVC.BLL.BlogPostOperations.GetAuthorIdByUser;
+using BlogMVC.BLL.BlogPostOperations.CreateBlogPost;
+using BlogMVC.BLL.BlogPostOperations.GetCategoryById;
+using BlogMVC.BLL.BlogPostOperations.GetBlogPostAndCategoryNameById;
+using BlogMVC.BLL.BlogPostOperations.EditBlogPost;
+using BlogMVC.BLL.BlogPostOperations.SimpleGetById;
+using BlogMVC.BLL.BlogPostOperations.DeleteBlogPostById;
 
 namespace BlogMVC.Controllers
 {
     public class BlogPostsController : Controller
     {
-        private readonly BlogMVCContext _context;
-        private readonly UserManager<User> _userManager;
+        private readonly IMediator _mediator;
 
-        public BlogPostsController(BlogMVCContext context, UserManager<User> userManager)
+        public BlogPostsController(IMediator mediator)
         {
-            _context = context;
-            _userManager = userManager;
+            _mediator = mediator;
         }
 
         // GET: BlogPosts
         public async Task<IActionResult> Index(string? searchTitle, string? searchCategory, string? searchAuthor)
         {
-            var blogs = await _context.BlogPost.ToListAsync();
-
-            if (!string.IsNullOrEmpty(searchTitle))
-            {
-                blogs = blogs.Where(b => b.Title.Contains(searchTitle)).ToList();
-            }
-
-            if (!string.IsNullOrEmpty(searchCategory))
-            {
-                blogs = blogs.Where(b => _context.Category.Find(b.CategoryId).Name.Contains(searchCategory)).ToList();
-            }
-
-            if (!string.IsNullOrEmpty(searchAuthor))
-            {
-                blogs = blogs.Where(b => _context.Author.Find(b.AuthorId).NickName.Contains(searchAuthor)).ToList();
-            }
-
-            blogs.ForEach(b => b.Author = _context.Author.Find(b.AuthorId));
-            blogs.ForEach(b => b.Category = _context.Category.Find(b.CategoryId));
-
-            blogs = blogs.OrderBy(b => b.Title).ToList();
+            var blogs = await _mediator.Send(new GetBlogPostsRequest { SearchAuthor = searchAuthor, SearchCategory = searchCategory, SearchTitle = searchTitle });
             return View(blogs);
         }
 
         // GET: BlogPosts/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.BlogPost == null)
-            {
-                return NotFound();
-            }
-
-            var blogPost = await _context.BlogPost
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (blogPost == null)
-            {
-                return NotFound();
-            }
-
-            blogPost.Author = await _context.Author.FindAsync(blogPost.AuthorId);
-            blogPost.Category = await _context.Category.FindAsync(blogPost.CategoryId);
-
-            var comments = await _context.Comment.Where(c => c.BlogPostId == id).ToListAsync();
-            comments.ForEach(c => c.User = _context.User.Find(c.UserId));
-            BlogPostWithComments blogPostWithComments = 
-                new BlogPostWithComments 
-                { 
-                    BlogPostValue = blogPost,
-                    CommentList = comments,
-                    NewComment = new Comment()
-                };
-
+            var blogPostWithComments = await _mediator.Send(new GetBlogPostsByIdRequest { Id = id });
             return View(blogPostWithComments);
         }
 
@@ -85,18 +52,14 @@ namespace BlogMVC.Controllers
             {
                 if (!string.IsNullOrEmpty(blogPostWithComments.NewComment.Text))
                 {
-                    await _context.AddAsync(blogPostWithComments.NewComment);
-                    await _context.SaveChangesAsync();
-                    blogPostWithComments.CommentList = await _context.Comment
-                        .Where(c => c.BlogPostId == blogPostWithComments.BlogPostValue.Id).ToListAsync();
-                    blogPostWithComments.CommentList.ForEach(c => c.User = _context.User.Find(c.UserId));
+                    blogPostWithComments = await _mediator.Send(new AddNewCommentCommand { BlogPostWithComments =  blogPostWithComments });
                     return RedirectToAction(nameof(Details), new { id = blogPostWithComments.BlogPostValue.Id });
                 }
 
             }
-            blogPostWithComments.CommentList = await _context.Comment
-                        .Where(c => c.BlogPostId == blogPostWithComments.BlogPostValue.Id).ToListAsync();
-            blogPostWithComments.CommentList.ForEach(c => c.User = _context.User.Find(c.UserId));
+            //blogPostWithComments.CommentList = await _context.Comment
+            //            .Where(c => c.BlogPostId == blogPostWithComments.BlogPostValue.Id).ToListAsync();
+            //blogPostWithComments.CommentList.ForEach(c => c.User = _context.User.Find(c.UserId));
             return View(blogPostWithComments);
         }
 
@@ -110,9 +73,7 @@ namespace BlogMVC.Controllers
 
         private async Task<IActionResult> GetAuthorUserId()
         {
-            var user = await _userManager.GetUserAsync(User);
-            string userId = user.Id;
-            var author = await _context.Author.Where(a => a.UserId.Equals(userId)).FirstOrDefaultAsync();
+            var author = await _mediator.Send(new GetUserAuthorByUserId { User = User });
             if (author == null)
             {
                 return RedirectToAction("Create", "Authors");
@@ -128,22 +89,9 @@ namespace BlogMVC.Controllers
         {
             if (ModelState.IsValid)
             {
-                using var transaction = _context.Database.BeginTransaction();
-                try
-                {
-                    int categoryId = await GetCategoryId(blogPost);
-                   
-                    await _context.AddAsync(new BlogPost { AuthorId = blogPost.AuthorId
-                        , CategoryId = categoryId, Date = blogPost.Date
-                        , Text = blogPost.Text, Title = blogPost.Title});
-                    await _context.SaveChangesAsync();
-                    await transaction.CommitAsync();
-                    return RedirectToAction(nameof(Index));
-                }
-                catch (Exception ex)
-                {
-                    await transaction.RollbackAsync();
-                }
+                int categoryId = await GetCategoryId(blogPost);
+                await _mediator.Send(new CreateBlogPostCommand { CategoryId = categoryId, BlogPostCreateViewModel = blogPost });
+                return RedirectToAction(nameof(Index));
             }
             var result = await GetAuthorUserId();
             return result;
@@ -151,40 +99,18 @@ namespace BlogMVC.Controllers
 
         private async Task<int> GetCategoryId(BlogPostCreateViewModel blogPost)
         {
-            int categoryId = -1;
-            while (categoryId == -1)
-            {
-                var category = _context.Category.Where(c => c.Name == blogPost.CategoryName).FirstOrDefault();
-
-                if (category == null)
-                {
-                    await _context.AddAsync(new Category { Name = blogPost.CategoryName });
-                    await _context.SaveChangesAsync();
-                }
-                else
-                {
-                    categoryId = category.Id;
-                }
-            }
-            return categoryId;
+            return await _mediator.Send(new GetCategoryByIdRequest { BlogPostCreateViewModel = blogPost});
         }
 
         // GET: BlogPosts/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.BlogPost == null)
-            {
-                return NotFound();
-            }
+            var response = await _mediator.Send(new GetBlogPostAndCategoryNameByIdRequest { Id = id });
+            var blogPost = response.BlogPost;
 
-            var blogPost = await _context.BlogPost.FindAsync(id);
-            if (blogPost == null)
-            {
-                return NotFound();
-            }
             var authorId = await GetAuthorId();
             ViewData["AuthorId"] = authorId;
-            var categoryName = (await _context.Category.FindAsync(blogPost.CategoryId)).Name;
+            var categoryName = response.CategoryName;
             ViewData["CategoryName"] = categoryName;
             return View(new BlogPostCreateViewModel { Id = blogPost.Id, CategoryName = categoryName
                 , AuthorId = authorId, Date = blogPost.Date
@@ -193,9 +119,7 @@ namespace BlogMVC.Controllers
 
         private async Task<int> GetAuthorId()
         {
-            var user = await _userManager.GetUserAsync(User);
-            string userId = user.Id;
-            var author = await _context.Author.Where(a => a.UserId.Equals(userId)).FirstOrDefaultAsync();
+            var author = await _mediator.Send(new GetUserAuthorByUserId { User = User });
             return author.Id;
         }
 
@@ -211,35 +135,8 @@ namespace BlogMVC.Controllers
 
             if (ModelState.IsValid)
             {
-                using var transaction = _context.Database.BeginTransaction();
-                try
-                {
-                    int categoryId = await GetCategoryId(blogPost);
-                    var blog = await _context.BlogPost.FindAsync(blogPost.Id);
-                    blog.AuthorId = blogPost.AuthorId;
-                    blog.CategoryId = categoryId;
-                    blog.Text = blogPost.Text;
-                    blog.Date = blogPost.Date;
-                    blog.Title = blogPost.Title;
-                    _context.Update(blog);
-                    await _context.SaveChangesAsync();
-                    await transaction.CommitAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!BlogPostExists(blogPost.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    await transaction.RollbackAsync();
-                }
+                int categoryId = await GetCategoryId(blogPost);
+                await _mediator.Send(new EditBlogPostCommand { CategoryId = categoryId, CreateViewModel = blogPost });
                 return RedirectToAction(nameof(Details), new {id = blogPost.Id});
             }
             ViewData["AuthorId"] = await GetAuthorId();
@@ -250,21 +147,7 @@ namespace BlogMVC.Controllers
         // GET: BlogPosts/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.BlogPost == null)
-            {
-                return NotFound();
-            }
-
-            var blogPost = await _context.BlogPost
-                .Include(b => b.Author)
-                .Include(b => b.Category)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (blogPost == null)
-            {
-                return NotFound();
-            }
-
-            return View(blogPost);
+            return View(await _mediator.Send(new SimpleGetByIdRequest { Id = id}));
         }
 
         // POST: BlogPosts/Delete/5
@@ -272,23 +155,8 @@ namespace BlogMVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.BlogPost == null)
-            {
-                return Problem("Entity set 'BlogMVCContext.BlogPost'  is null.");
-            }
-            var blogPost = await _context.BlogPost.FindAsync(id);
-            if (blogPost != null)
-            {
-                _context.BlogPost.Remove(blogPost);
-            }
-            
-            await _context.SaveChangesAsync();
+            await _mediator.Send(new DeleteBlogPostByIdCommand { Id = id});
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool BlogPostExists(int? id)
-        {
-          return (_context.BlogPost?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

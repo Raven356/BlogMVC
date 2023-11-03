@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace BlogMVC.Models
+namespace BlogMVC.BLL.Models
 {
     public class Category
     {

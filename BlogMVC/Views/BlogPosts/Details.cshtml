@@ -1,0 +1,75 @@
+﻿@using Microsoft.AspNetCore.Identity;
+@inject UserManager<User> UserManager;
+@model BlogMVC.Models.BlogPostWithComments
+
+@{
+    ViewData["Title"] = "Details";
+    var user = await UserManager.GetUserAsync(User);
+    var blog = Model.BlogPostValue;
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h2 class="text-center mb-2">@Model.BlogPostValue.Title</h2>
+            <div class="card">
+                <div class="card-body">
+                    <p class="card-text">@Model.BlogPostValue.Text</p>
+                    <div class="d-flex justify-content-between">
+                        <small class="text-muted">Date: @Model.BlogPostValue.Date</small>
+                        <small class="text-muted">@Model.BlogPostValue.Category.Name</small>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <small class="text-muted">Author: @Model.BlogPostValue.Author.NickName</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-center mt-3">
+                @if (user != null && user.Id.Equals(Model.BlogPostValue.Author.UserId))
+                {
+                    <a asp-action="Edit" asp-route-id="@Model?.BlogPostValue.Id" class="btn btn-sm btn-primary w-25 mx-2">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@Model?.BlogPostValue.Id" class="btn btn-sm btn-danger w-25 mx-2">Delete</a>
+                }
+            </div>
+
+            <h2 class="text-center mt-2">Comment section</h2>
+            @foreach (var comment in Model.CommentList)
+            {
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <p class="card-text">@comment.User.Name @comment.User.Surname: @comment.Text</p>
+                    </div>
+                </div>
+            }
+
+            <form asp-controller="BlogPosts" asp-action="Details" method="post" class="mt-4">
+                <input type="hidden" asp-for="NewComment.BlogPostId" value="@Model.BlogPostValue.Id" />
+                <input type="hidden" asp-for="CommentList" value="@Model.CommentList" />
+                <input type="hidden" asp-for="BlogPostValue.Text" value="@Model.BlogPostValue.Text" />
+                <input type="hidden" asp-for="BlogPostValue.Title" value="@Model.BlogPostValue.Title" />
+                <input type="hidden" asp-for="BlogPostValue.Date" value="@Model.BlogPostValue.Date" />
+                <input type="hidden" asp-for="BlogPostValue.AuthorId" value="@Model.BlogPostValue.AuthorId" />
+                <input type="hidden" asp-for="BlogPostValue.CategoryId" value="@Model.BlogPostValue.CategoryId" />
+                <input type="hidden" asp-for="BlogPostValue.Id" value="@Model.BlogPostValue.Id" />
+                <input type="hidden" asp-for="BlogPostValue.Author.Id" value="@Model.BlogPostValue.Author.Id" />
+                <input type="hidden" asp-for="BlogPostValue.Author.NickName" value="@Model.BlogPostValue.Author.NickName" />
+                <input type="hidden" asp-for="BlogPostValue.Author.UserId" value="@Model.BlogPostValue.Author.UserId" />
+                <input type="hidden" asp-for="BlogPostValue.Category.Id" value="@Model.BlogPostValue.Category.Id" />
+                <input type="hidden" asp-for="BlogPostValue.Category.Name" value="@Model.BlogPostValue.Category.Name" />
+                @if (user != null)
+                {
+                    <input type="hidden" asp-for="NewComment.UserId" value="@user.Id" />
+                }
+                <div class="form-group mb-3">
+                    <label asp-for="NewComment.Text"></label>
+                    <textarea class="form-control" asp-for="NewComment.Text"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary d-block mx-auto">Submit Comment</button>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+

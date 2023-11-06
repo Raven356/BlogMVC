@@ -23,7 +23,7 @@ namespace BlogMVC.Controllers
         // GET: Categories/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            var category = _mediator.Send(new GetCategoriesByIdRequest { Id = id });
+            var category = await _mediator.Send(new GetCategoriesByIdRequest { Id = id });
             if (category == null)
             {
                 return NotFound();

@@ -1,5 +1,5 @@
-﻿using BlogMVC.BLL.Context;
-using BlogMVC.BLL.Models;
+﻿using BlogMVC.DAL.Models;
+using BlogMVC.DAL.Repository;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -14,12 +14,12 @@ namespace BlogMVC.BLL.BlogPostOperations.GetAuthorIdByUser
 {
     public class GetAuthorByUserIdHandler : IRequestHandler<GetUserAuthorByUserId, Author>
     {
-        private readonly BlogMVCContext _context;
+        private readonly IRepository<Author> _repository;
         private readonly UserManager<User> _userManager;
 
-        public GetAuthorByUserIdHandler(BlogMVCContext context, UserManager<User> userManager)
+        public GetAuthorByUserIdHandler(IRepository<Author> repository, UserManager<User> userManager)
         {
-            _context = context;
+            _repository = repository;
             _userManager = userManager;
         }
 
@@ -27,7 +27,7 @@ namespace BlogMVC.BLL.BlogPostOperations.GetAuthorIdByUser
         {
             var user = await _userManager.GetUserAsync(request.User);
             string userId = user.Id;
-            var author = await _context.Author.Where(a => a.UserId.Equals(userId)).FirstOrDefaultAsync();
+            var author = await _repository.GetAll().AsQueryable().Where(a => a.UserId.Equals(userId)).FirstOrDefaultAsync();
             return author;
         }
     }

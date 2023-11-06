@@ -1,26 +1,26 @@
-﻿using BlogMVC.BLL.Context;
+﻿using BlogMVC.DAL.Models;
+using BlogMVC.DAL.Repository;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BlogMVC.BLL.BlogPostOperations.GetBlogPostAndCategoryNameById
 {
     public class GetBlogPostAndCategoryNameByIdRequestHandler : IRequestHandler<GetBlogPostAndCategoryNameByIdRequest, GetBlogPostAndCategoryNameByIdResponse>
     {
-        private readonly BlogMVCContext _context;
-        public GetBlogPostAndCategoryNameByIdRequestHandler(BlogMVCContext context)
+        private readonly IRepository<BlogPost> _blogPostRepository;
+        private readonly IRepository<Category> _categoryRepository;
+
+        public GetBlogPostAndCategoryNameByIdRequestHandler(IRepository<BlogPost> blogPostRepository
+            , IRepository<Category> categoryRepository )
         {
-            _context = context;
+            _blogPostRepository = blogPostRepository;
+            _categoryRepository = categoryRepository;
         }
 
         public async Task<GetBlogPostAndCategoryNameByIdResponse> Handle(GetBlogPostAndCategoryNameByIdRequest request, CancellationToken cancellationToken)
         {
-            var blogPost = await _context.BlogPost.FindAsync(request.Id);
+            var blogPost = await _blogPostRepository.GetById(request.Id);
 
-            var categoryName = (await _context.Category.FindAsync(blogPost.CategoryId)).Name;
+            var categoryName = (await _categoryRepository.GetById(blogPost.CategoryId)).Name;
 
             return new GetBlogPostAndCategoryNameByIdResponse { BlogPost = blogPost, CategoryName = categoryName };
         }

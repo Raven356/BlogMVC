@@ -1,27 +1,22 @@
-﻿using BlogMVC.BLL.Context;
-using BlogMVC.BLL.Models;
+﻿using BlogMVC.DAL.Models;
+using BlogMVC.DAL.Repository;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BlogMVC.BLL.CategoriesOperations
 {
     public class GetCategoriesByIdRequestHandler : IRequestHandler<GetCategoriesByIdRequest, Category>
     {
-        private readonly BlogMVCContext _context;
+        private readonly IRepository<Category> _categoryRepository;
 
-        public GetCategoriesByIdRequestHandler(BlogMVCContext context)
+        public GetCategoriesByIdRequestHandler(IRepository<Category> repository)
         {
-            _context = context;
+            _categoryRepository = repository;
         }
 
         public async Task<Category> Handle(GetCategoriesByIdRequest request, CancellationToken cancellationToken)
         {
-            var category = await _context.Category
+            var category = await _categoryRepository.GetAll().AsQueryable()
                 .FirstOrDefaultAsync(m => m.Id == request.Id);
             return category;
         }

@@ -1,4 +1,6 @@
-﻿namespace BlogMVC.BLL.Models
+﻿using BlogMVC.DAL.Models;
+
+namespace BlogMVC.BLL.Models
 {
     public class BlogPostWithComments
     {

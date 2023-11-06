@@ -1,5 +1,5 @@
-﻿using BlogMVC.BLL.Context;
-using BlogMVC.BLL.Models;
+﻿using BlogMVC.DAL.Models;
+using BlogMVC.DAL.Repository;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -12,19 +12,20 @@ namespace BlogMVC.BLL.AuthorsOperations.GetAuthorById
 {
     public class GetAuthorByIdRequestHandler : IRequestHandler<GetAuthorByIdRequest, Author>
     {
-        private readonly BlogMVCContext _context;
+        private readonly IRepository<Author> _repository;
+        private readonly IRepository<User> _userRepository;
 
-        public GetAuthorByIdRequestHandler(BlogMVCContext context)
+        public GetAuthorByIdRequestHandler(IRepository<Author> repository, IRepository<User> userRepository)
         {
-            _context = context;
+            _repository = repository;
+            _userRepository = userRepository;
         }
 
         public async Task<Author> Handle(GetAuthorByIdRequest request, CancellationToken cancellationToken)
         {
-            var author = await _context.Author
-                .FirstOrDefaultAsync(m => m.Id == request.Id);
+            var author = await _repository.GetById(request.Id);
 
-            author.User = await _context.User.FindAsync(author.UserId);
+            author.User = await _userRepository.GetById(author.UserId);
             return author;
         }
     }

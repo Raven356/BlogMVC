@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using BlogMVC.BLL.Models;
+using BlogMVC.DAL.Models;
 
-namespace BlogMVC.BLL.Context
+namespace BlogMVC.DAL.Context
 {
     public class BlogMVCContext : IdentityDbContext<User>
     {

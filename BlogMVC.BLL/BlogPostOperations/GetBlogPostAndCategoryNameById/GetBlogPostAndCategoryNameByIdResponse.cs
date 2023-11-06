@@ -1,9 +1,4 @@
-﻿using BlogMVC.BLL.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using BlogMVC.DAL.Models;
 
 namespace BlogMVC.BLL.BlogPostOperations.GetBlogPostAndCategoryNameById
 {

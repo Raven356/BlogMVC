@@ -5,7 +5,7 @@ using BlogMVC.BLL;
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("BlogMVCContext") 
     ?? throw new InvalidOperationException("Connection string 'BlogMVCContext' not found.");
-Startup.Configure(builder.Services, connectionString);
+DependencyResolver.Configure(builder.Services, connectionString);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

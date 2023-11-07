@@ -31,14 +31,16 @@ namespace BlogMVC.BLL.BlogPostOperations.GetAllBlogPosts
 
             if (!string.IsNullOrEmpty(request.SearchCategory))
             {
-                blogs = blogs.Where(b => _categoryRepository.GetById(b.CategoryId)
-                    .Result.Name.Contains(request.SearchCategory));
+                var category = _categoryRepository.GetAll().AsQueryable();
+                blogs = blogs.Where(b => category.Where(c => c.Id == b.CategoryId).First()
+                    .Name.Contains(request.SearchCategory));
             }
 
             if (!string.IsNullOrEmpty(request.SearchAuthor))
             {
-                blogs = blogs.Where(b => _authorRepository.GetById(b.AuthorId)
-                    .Result.NickName.Contains(request.SearchAuthor));
+                var author = _authorRepository.GetAll().AsQueryable();
+                blogs = blogs.Where(b =>author.Where(a => a.Id == b.AuthorId).First()
+                    .NickName.Contains(request.SearchAuthor));
             }
 
             await blogs.ForEachAsync(b => b.Author = _authorRepository.GetById(b.AuthorId).Result);

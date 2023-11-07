@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace BlogMVC.BLL.Models
+namespace BlogMVC.DAL.Models
 {
     public class User : IdentityUser
     {

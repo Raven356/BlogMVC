@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BlogMVC.BLL\BlogMVC.BLL.csproj" />
+    <ProjectReference Include="..\BlogMVC.DAL\BlogMVC.DAL.csproj" />
   </ItemGroup>
 
   <ItemGroup>

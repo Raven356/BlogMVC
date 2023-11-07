@@ -1,4 +1,4 @@
-﻿using BlogMVC.BLL.Models;
+﻿using BlogMVC.DAL.Models;
 using MediatR;
 using System;
 using System.Collections.Generic;

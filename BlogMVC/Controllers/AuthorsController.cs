@@ -8,11 +8,10 @@ using Microsoft.EntityFrameworkCore;
 using BlogMVC.Models;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
-using BlogMVC.BLL.Context;
 using System.Drawing.Text;
 using MediatR;
 using BlogMVC.BLL.AuthorsOperations.GetAuthorById;
-using BlogMVC.BLL.Models;
+using BlogMVC.DAL.Models;
 using BlogMVC.BLL.AuthorsOperations.CreateAuthor;
 
 namespace BlogMVC.Controllers

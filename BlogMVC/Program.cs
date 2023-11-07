@@ -2,13 +2,11 @@
 using Microsoft.Extensions.DependencyInjection;
 using BlogMVC.Models;
 using Microsoft.AspNetCore.Identity;
-using BlogMVC.BLL.Context;
 using BlogMVC.BLL;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<BlogMVCContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("BlogMVCContext") ?? throw new InvalidOperationException("Connection string 'BlogMVCContext' not found.")));
-Startup.Configure(builder.Services);
+var connectionString = builder.Configuration.GetConnectionString("BlogMVCContext") ?? throw new InvalidOperationException("Connection string 'BlogMVCContext' not found.");
+Startup.Configure(builder.Services, connectionString);
 
 // Add services to the container.
 //builder.Services.AddIdentity<User, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)

@@ -1,27 +1,21 @@
-﻿using BlogMVC.BLL.Context;
-using BlogMVC.BLL.Models;
+﻿using BlogMVC.DAL.Models;
+using BlogMVC.DAL.Repository;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BlogMVC.BLL.AuthorsOperations.CreateAuthor
 {
     public class CreateAuthorCommandHandler : IRequestHandler<CreateAuthorCommand, Unit>
     {
-        private readonly BlogMVCContext _context;
+        private readonly IRepository<Author> _repository;
 
-        public CreateAuthorCommandHandler(BlogMVCContext context)
+        public CreateAuthorCommandHandler(IRepository<Author> repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
         public async Task<Unit> Handle(CreateAuthorCommand request, CancellationToken cancellationToken)
         {
-            _context.Add(request.Author);
-            await _context.SaveChangesAsync();
+            await _repository.Add(request.Author);
             return Unit.Value;
         }
     }

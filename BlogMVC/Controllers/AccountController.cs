@@ -1,4 +1,4 @@
-﻿using BlogMVC.BLL.Models;
+﻿using BlogMVC.DAL.Models;
 using BlogMVC.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

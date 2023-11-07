@@ -1,21 +1,16 @@
-﻿using BlogMVC.BLL.Context;
-using BlogMVC.BLL.Models;
+﻿using BlogMVC.DAL.Models;
+using BlogMVC.DAL.Repository;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BlogMVC.BLL.BlogPostOperations.GetCategoryById
 {
     public class GetCategoryByIdRequestHandler : IRequestHandler<GetCategoryByIdRequest, int>
     {
-        private readonly BlogMVCContext _context;
+        private readonly IRepository<Category> _repository;
 
-        public GetCategoryByIdRequestHandler(BlogMVCContext context)
+        public GetCategoryByIdRequestHandler(IRepository<Category> repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
         public async Task<int> Handle(GetCategoryByIdRequest request, CancellationToken cancellationToken)
@@ -23,12 +18,13 @@ namespace BlogMVC.BLL.BlogPostOperations.GetCategoryById
             int categoryId = -1;
             while (categoryId == -1)
             {
-                var category = _context.Category.Where(c => c.Name == request.BlogPostCreateViewModel.CategoryName).FirstOrDefault();
+                var category = _repository.GetAll().AsQueryable()
+                    .Where(c => c.Name == request.BlogPostCreateViewModel.CategoryName)
+                    .FirstOrDefault();
 
                 if (category == null)
                 {
-                    await _context.AddAsync(new Category { Name = request.BlogPostCreateViewModel.CategoryName });
-                    await _context.SaveChangesAsync();
+                    await _repository.Add(new Category { Name = request.BlogPostCreateViewModel.CategoryName });
                 }
                 else
                 {

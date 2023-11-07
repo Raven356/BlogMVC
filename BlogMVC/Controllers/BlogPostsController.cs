@@ -1,11 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using BlogMVC.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using BlogMVC.BLL.Context;
 using MediatR;
-using BlogMVC.BLL.BlogPostOperations;
 using BlogMVC.BLL.BlogPostOperations.GetBlogPostsById;
 using BlogMVC.BLL.BlogPostOperations.GetAllBlogPosts;
 using BlogMVC.BLL.Models;

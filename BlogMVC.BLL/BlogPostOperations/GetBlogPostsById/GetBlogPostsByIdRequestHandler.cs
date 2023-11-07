@@ -1,34 +1,42 @@
-﻿using BlogMVC.BLL.Context;
-using BlogMVC.BLL.Models;
+﻿using BlogMVC.BLL.Models;
+using BlogMVC.DAL.Models;
+using BlogMVC.DAL.Repository;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BlogMVC.BLL.BlogPostOperations.GetBlogPostsById
 {
     public class GetBlogPostsByIdRequestHandler : IRequestHandler<GetBlogPostsByIdRequest, BlogPostWithComments>
     {
-        private readonly BlogMVCContext _context;
+        private readonly IRepository<BlogPost> _blogPostRepository;
+        private readonly IRepository<Category> _categoryRepository;
+        private readonly IRepository<Comment> _commentRepository;
+        private readonly IRepository<User> _userRepository;
+        private readonly IRepository<Author> _authorRepository;
 
-        public GetBlogPostsByIdRequestHandler(BlogMVCContext context)
+        public GetBlogPostsByIdRequestHandler(IRepository<Category> categoryRepository
+            , IRepository<Comment> commentRepository
+            , IRepository<User> userRepository
+            , IRepository<BlogPost> blogPostRepository
+            , IRepository<Author> authorRepository)
         {
-            _context = context;
+            _categoryRepository = categoryRepository;
+            _commentRepository = commentRepository;
+            _userRepository = userRepository;
+            _blogPostRepository = blogPostRepository;
+            _authorRepository = authorRepository;
         }
 
         public async Task<BlogPostWithComments> Handle(GetBlogPostsByIdRequest request, CancellationToken cancellationToken)
         {
-            var blogPost = await _context.BlogPost
+            var blogPost = await _blogPostRepository.GetAll().AsQueryable()
                 .FirstOrDefaultAsync(m => m.Id == request.Id);
 
-            blogPost.Author = await _context.Author.FindAsync(blogPost.AuthorId);
-            blogPost.Category = await _context.Category.FindAsync(blogPost.CategoryId);
+            blogPost.Author = await _authorRepository.GetById(blogPost.AuthorId);
+            blogPost.Category = await _categoryRepository.GetById(blogPost.CategoryId);
 
-            var comments = await _context.Comment.Where(c => c.BlogPostId == request.Id).ToListAsync();
-            comments.ForEach(c => c.User = _context.User.Find(c.UserId));
+            var comments = await _commentRepository.GetAll().AsQueryable().Where(c => c.BlogPostId == request.Id).ToListAsync();
+            comments.ForEach(c => c.User = _userRepository.GetById(c.UserId).Result);
             BlogPostWithComments blogPostWithComments =
                 new BlogPostWithComments
                 {

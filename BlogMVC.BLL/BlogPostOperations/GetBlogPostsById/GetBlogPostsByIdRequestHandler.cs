@@ -35,7 +35,9 @@ namespace BlogMVC.BLL.BlogPostOperations.GetBlogPostsById
             blogPost.Author = await _authorRepository.GetById(blogPost.AuthorId);
             blogPost.Category = await _categoryRepository.GetById(blogPost.CategoryId);
 
-            var comments = await _commentRepository.GetAll().AsQueryable().Where(c => c.BlogPostId == request.Id).ToListAsync();
+            var comments = await _commentRepository.GetAll().AsQueryable()
+                .Where(c => c.BlogPostId == request.Id).ToListAsync();
+
             comments.ForEach(c => c.User = _userRepository.GetById(c.UserId).Result);
             BlogPostWithComments blogPostWithComments =
                 new BlogPostWithComments

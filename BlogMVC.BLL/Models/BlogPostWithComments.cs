@@ -6,7 +6,7 @@ namespace BlogMVC.BLL.Models
     {
         public BlogPost BlogPostValue { get; set; }
 
-        public List<Comment> CommentList { get; set; }
+        public IEnumerable<Comment> CommentList { get; set; }
 
         public Comment NewComment { get; set; }
     }

@@ -27,7 +27,8 @@ namespace BlogMVC.BLL.BlogPostOperations.GetAuthorIdByUser
         {
             var user = await _userManager.GetUserAsync(request.User);
             string userId = user.Id;
-            var author = await _repository.GetAll().AsQueryable().Where(a => a.UserId.Equals(userId)).FirstOrDefaultAsync();
+            var author = await _repository.GetAll().AsQueryable()
+                .Where(a => a.UserId.Equals(userId)).FirstOrDefaultAsync();
             return author;
         }
     }

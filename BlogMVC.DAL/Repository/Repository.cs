@@ -1,20 +1,15 @@
 ﻿using BlogMVC.DAL.Context;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BlogMVC.DAL.Repository
 {
     public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
     {
-        private readonly BlogMVCContext _context;
+        private readonly IBlogMVCContext _context;
         private bool disposedValue;
         private readonly DbSet<TEntity> _dbSet;
 
-        public Repository(BlogMVCContext context)
+        public Repository(IBlogMVCContext context)
         {
             _context = context;
             _dbSet = _context.Set<TEntity>();

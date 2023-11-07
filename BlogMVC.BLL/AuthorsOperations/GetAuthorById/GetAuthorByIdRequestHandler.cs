@@ -1,12 +1,6 @@
 ﻿using BlogMVC.DAL.Models;
 using BlogMVC.DAL.Repository;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BlogMVC.BLL.AuthorsOperations.GetAuthorById
 {

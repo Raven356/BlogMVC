@@ -4,7 +4,7 @@ using BlogMVC.DAL.Models;
 
 namespace BlogMVC.DAL.Context
 {
-    public class BlogMVCContext : IdentityDbContext<User>
+    public class BlogMVCContext : IdentityDbContext<User>, IBlogMVCContext
     {
         public BlogMVCContext (DbContextOptions<BlogMVCContext> options)
             : base(options)

@@ -18,6 +18,7 @@ namespace BlogMVC.BLL
                 .ForMember(dst => dst.Title, opt => opt.MapFrom(s => s.BlogPostCreateViewModel.Title))
                 .ForMember(dst => dst.Author, opt => opt.Ignore())
                 .ForMember(dst => dst.Category, opt => opt.Ignore());
+
             CreateMap<EditBlogPostCommand, BlogPost>()
                 .ForMember(dst => dst.AuthorId, opt => opt.MapFrom(s => s.CreateViewModel.AuthorId))
                 .ForMember(dst => dst.Id, opt => opt.Ignore())

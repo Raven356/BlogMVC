@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using MediatR;
 using BlogMVC.BLL.BlogPostOperations.GetBlogPostsById;
 using BlogMVC.BLL.BlogPostOperations.GetAllBlogPosts;
 using BlogMVC.BLL.Models;
@@ -12,29 +11,30 @@ using BlogMVC.BLL.BlogPostOperations.GetBlogPostAndCategoryNameById;
 using BlogMVC.BLL.BlogPostOperations.EditBlogPost;
 using BlogMVC.BLL.BlogPostOperations.SimpleGetById;
 using BlogMVC.BLL.BlogPostOperations.DeleteBlogPostById;
+using BlogMVC.BLL.BlogPostOperations.BlogPostService;
 
 namespace BlogMVC.Controllers
 {
     public class BlogPostsController : Controller
     {
-        private readonly IMediator _mediator;
+        private readonly IBlogPostService _blogPostService;
 
-        public BlogPostsController(IMediator mediator)
+        public BlogPostsController(IBlogPostService blogPostService)
         {
-            _mediator = mediator;
+            _blogPostService = blogPostService;
         }
 
         // GET: BlogPosts
         public async Task<IActionResult> Index(string? searchTitle, string? searchCategory, string? searchAuthor)
         {
-            var blogs = await _mediator.Send(new GetBlogPostsRequest { SearchAuthor = searchAuthor, SearchCategory = searchCategory, SearchTitle = searchTitle });
+            var blogs = await _blogPostService.GetAllBlogPosts(new GetBlogPostsRequest { SearchAuthor = searchAuthor, SearchCategory = searchCategory, SearchTitle = searchTitle });
             return View(blogs);
         }
 
         // GET: BlogPosts/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            var blogPostWithComments = await _mediator.Send(new GetBlogPostsByIdRequest { Id = id });
+            var blogPostWithComments = await _blogPostService.GetBlogPostById(new GetBlogPostsByIdRequest { Id = id });
             return View(blogPostWithComments);
         }
 
@@ -47,7 +47,7 @@ namespace BlogMVC.Controllers
             {
                 if (!string.IsNullOrEmpty(blogPostWithComments.NewComment.Text))
                 {
-                    blogPostWithComments = await _mediator.Send(new AddNewCommentCommand { BlogPostWithComments =  blogPostWithComments });
+                    blogPostWithComments = await _blogPostService.AddNewComment(new AddNewCommentCommand { BlogPostWithComments =  blogPostWithComments });
                     return RedirectToAction(nameof(Details), new { id = blogPostWithComments.BlogPostValue.Id });
                 }
 
@@ -68,7 +68,7 @@ namespace BlogMVC.Controllers
 
         private async Task<IActionResult> GetAuthorUserId()
         {
-            var author = await _mediator.Send(new GetUserAuthorByUserId { User = User });
+            var author = await _blogPostService.GetAuthorByUserId(new GetUserAuthorByUserId { User = User });
             if (author == null)
             {
                 return RedirectToAction("Create", "Authors");
@@ -85,7 +85,8 @@ namespace BlogMVC.Controllers
             if (ModelState.IsValid)
             {
                 int categoryId = await GetCategoryId(blogPost);
-                await _mediator.Send(new CreateBlogPostCommand { CategoryId = categoryId, BlogPostCreateViewModel = blogPost });
+                await _blogPostService.CreateNewBlogPost
+                    (new CreateBlogPostCommand { CategoryId = categoryId, BlogPostCreateViewModel = blogPost });
                 return RedirectToAction(nameof(Index));
             }
             var result = await GetAuthorUserId();
@@ -94,13 +95,15 @@ namespace BlogMVC.Controllers
 
         private async Task<int> GetCategoryId(BlogPostCreateViewModel blogPost)
         {
-            return await _mediator.Send(new GetCategoryByIdRequest { BlogPostCreateViewModel = blogPost});
+            return await _blogPostService
+                .GetCategoryById(new GetCategoryByIdRequest { BlogPostCreateViewModel = blogPost});
         }
 
         // GET: BlogPosts/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            var response = await _mediator.Send(new GetBlogPostAndCategoryNameByIdRequest { Id = id });
+            var response = await _blogPostService
+                .GetBlogPostAndCategoryName(new GetBlogPostAndCategoryNameByIdRequest { Id = id });
             var blogPost = response.BlogPost;
 
             var authorId = await GetAuthorId();
@@ -114,7 +117,7 @@ namespace BlogMVC.Controllers
 
         private async Task<int> GetAuthorId()
         {
-            var author = await _mediator.Send(new GetUserAuthorByUserId { User = User });
+            var author = await _blogPostService.GetAuthorByUserId(new GetUserAuthorByUserId { User = User });
             return author.Id;
         }
 
@@ -131,7 +134,8 @@ namespace BlogMVC.Controllers
             if (ModelState.IsValid)
             {
                 int categoryId = await GetCategoryId(blogPost);
-                await _mediator.Send(new EditBlogPostCommand { CategoryId = categoryId, CreateViewModel = blogPost });
+                await _blogPostService
+                    .EditBlogPost(new EditBlogPostCommand { CategoryId = categoryId, CreateViewModel = blogPost });
                 return RedirectToAction(nameof(Details), new {id = blogPost.Id});
             }
             ViewData["AuthorId"] = await GetAuthorId();
@@ -142,7 +146,7 @@ namespace BlogMVC.Controllers
         // GET: BlogPosts/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            return View(await _mediator.Send(new SimpleGetByIdRequest { Id = id}));
+            return View(await _blogPostService.SimpleGetBlogPostById(new SimpleGetByIdRequest { Id = id}));
         }
 
         // POST: BlogPosts/Delete/5
@@ -150,7 +154,7 @@ namespace BlogMVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            await _mediator.Send(new DeleteBlogPostByIdCommand { Id = id});
+            await _blogPostService.DeleteBlogPost(new DeleteBlogPostByIdCommand { Id = id});
             return RedirectToAction(nameof(Index));
         }
     }

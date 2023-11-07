@@ -1,34 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using BlogMVC.Models;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using System.Drawing.Text;
 using MediatR;
 using BlogMVC.BLL.AuthorsOperations.GetAuthorById;
 using BlogMVC.DAL.Models;
 using BlogMVC.BLL.AuthorsOperations.CreateAuthor;
+using BlogMVC.BLL.AuthorsOperations.AuthorsService;
 
 namespace BlogMVC.Controllers
 {
     public class AuthorsController : Controller
     {
-        private readonly IMediator _mediator;
+        private readonly IAuthorsService _authorsService;
 
-        public AuthorsController(IMediator mediator)
+        public AuthorsController(IAuthorsService authorsService)
         {
-            _mediator = mediator;
+            _authorsService = authorsService;
         }
 
         // GET: Authors/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            var author = await _mediator.Send(new GetAuthorByIdRequest { Id = id });
+            var author = await _authorsService.GetAuthorById(new GetAuthorByIdRequest { Id = id});
 
             return View(author);
         }
@@ -48,7 +40,7 @@ namespace BlogMVC.Controllers
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 author.UserId = userId;
-                await _mediator.Send(new CreateAuthorCommand { Author = author });
+                await _authorsService.CreateAuthor(new CreateAuthorCommand { Author = author });
                 return RedirectToAction("Create", "BlogPosts");
             }
             //ViewData["UserId"] = new SelectList(_context.Set<User>(), "Id", "Id", author.UserId);

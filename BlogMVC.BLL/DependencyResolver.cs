@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using BlogMVC.BLL.AuthorsOperations.AuthorsService;
+using BlogMVC.BLL.BlogPostOperations.BlogPostService;
+using BlogMVC.BLL.CategoriesOperations.CategoriesService;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BlogMVC.BLL
 {
@@ -8,7 +11,9 @@ namespace BlogMVC.BLL
         {
             BlogMVC.DAL.DependencyResolver.Configure(services, connectionString);
 
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DependencyResolver).Assembly));
+            services.AddScoped<IAuthorsService, AuthorsService>();
+            services.AddScoped<IBlogPostService, BlogPostService>();
+            services.AddScoped<ICategoriesService, CategoriesService>();
 
             services.AddAutoMapper(typeof(CoreMappingProfile).Assembly);
         }

@@ -11,6 +11,7 @@ namespace BlogMVC.BLL
     {
         public static void Configure(IServiceCollection services, string connectionString)
         {
+            services.AddScoped<IBlogMVCContext, BlogMVCContext>();
             services.AddDbContext<BlogMVCContext>(options =>
                 options.UseSqlServer(connectionString));
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Startup).Assembly));

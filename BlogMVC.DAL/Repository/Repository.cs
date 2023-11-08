@@ -23,24 +23,24 @@ namespace BlogMVC.DAL.Repository
 
         public async Task Delete(int? id)
         {
-            var entity = await _dbSet.FindAsync(id);
+            var entity = (await _dbSet.FindAsync(id))!;
             if (_context.Entry(entity).State == EntityState.Detached)
             {
-                _dbSet.Attach(entity);
+                _dbSet.Attach(entity!);
             }
-            _dbSet.Remove(entity);
+            _dbSet.Remove(entity!);
 
             await _context.SaveChangesAsync();
         }
 
-        public IEnumerable<TEntity> GetAll()
+        public IQueryable<TEntity> GetAll()
         {
             return _dbSet;
         }
 
         public async Task<TEntity> GetById(int? id)
         {
-            return await _dbSet.FindAsync(id);
+            return (await _dbSet.FindAsync(id))!;
         }
 
         public async Task Update(TEntity entity)
@@ -70,7 +70,7 @@ namespace BlogMVC.DAL.Repository
 
         public async Task<TEntity> GetById(string id)
         {
-            return await _dbSet.FindAsync(id);
+            return (await _dbSet.FindAsync(id))!;
         }
     }
 }

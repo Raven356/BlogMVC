@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
-using BlogMVC.BLL.BlogPostOperations.CreateBlogPost;
-using BlogMVC.BLL.BlogPostOperations.EditBlogPost;
+using BlogMVC.BLL.Models;
 using BlogMVC.DAL.Models;
+using BlogMVC.Models;
 
 namespace BlogMVC.BLL
 {
@@ -9,7 +9,7 @@ namespace BlogMVC.BLL
     {
         public CoreMappingProfile() 
         {
-            CreateMap<CreateBlogPostCommand, BlogPost>()
+            CreateMap<CreateBlogPostDTO, BlogPost>()
                 .ForMember(dst => dst.AuthorId, opt => opt.MapFrom(s => s.BlogPostCreateViewModel.AuthorId))
                 .ForMember(dst => dst.Id, opt => opt.Ignore())
                 .ForMember(dst => dst.Text, opt => opt.MapFrom(s => s.BlogPostCreateViewModel.Text))
@@ -19,7 +19,7 @@ namespace BlogMVC.BLL
                 .ForMember(dst => dst.Author, opt => opt.Ignore())
                 .ForMember(dst => dst.Category, opt => opt.Ignore());
 
-            CreateMap<EditBlogPostCommand, BlogPost>()
+            CreateMap<EditBlogPostDTO, BlogPost>()
                 .ForMember(dst => dst.AuthorId, opt => opt.MapFrom(s => s.CreateViewModel.AuthorId))
                 .ForMember(dst => dst.Id, opt => opt.Ignore())
                 .ForMember(dst => dst.Text, opt => opt.MapFrom(s => s.CreateViewModel.Text))
@@ -28,6 +28,12 @@ namespace BlogMVC.BLL
                 .ForMember(dst => dst.Title, opt => opt.MapFrom(s => s.CreateViewModel.Title))
                 .ForMember(dst => dst.Author, opt => opt.Ignore())
                 .ForMember(dst => dst.Category, opt => opt.Ignore());
+
+            CreateMap<Author, AuthorDTO>().ReverseMap();
+            CreateMap<BlogPost, BlogPostDTO>().ReverseMap();
+            CreateMap<Category, CategoryDTO>().ReverseMap();
+            CreateMap<User, UserDTO>().ReverseMap();
+            CreateMap<BlogPost, BlogPostCreateDTO>();
         }
     }
 }

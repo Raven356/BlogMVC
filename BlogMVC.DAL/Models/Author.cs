@@ -7,9 +7,9 @@ namespace BlogMVC.DAL.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        public string? NickName { get; set; }
+        public string NickName { get; set; } = null!;
 
-        public string? UserId { get; set; }
+        public string UserId { get; set; } = null!;
 
         [ForeignKey("UserId")]
         public User? User { get; set; }

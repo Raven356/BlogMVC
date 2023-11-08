@@ -1,11 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using BlogMVC.DAL.Models;
+using System.ComponentModel.DataAnnotations;
 
-namespace BlogMVC.DAL.Models
+namespace BlogMVC.Models
 {
-    public class BlogPost
+    public class BlogPostDTO
     {
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         public string Title { get; set; } = null!;
@@ -19,11 +18,8 @@ namespace BlogMVC.DAL.Models
 
         public int AuthorId { get; set; }
 
-        [ForeignKey(nameof(AuthorId))]
         public Author? Author { get; set; }
 
-        [ForeignKey(nameof(CategoryId))]
         public Category? Category { get; set; }
-
     }
 }

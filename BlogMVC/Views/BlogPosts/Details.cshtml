@@ -1,11 +1,10 @@
 ﻿@using Microsoft.AspNetCore.Identity;
-@inject UserManager<BlogMVC.DAL.Models.User> UserManager;
-@model BlogMVC.BLL.Models.BlogPostWithComments
+@inject BlogMVC.BLL.Services.AccountsService.IAccountService AccountService;
+@model BlogMVC.BLL.Models.BlogPostWithCommentsDTO
 
 @{
     ViewData["Title"] = "Details";
-    var user = await UserManager.GetUserAsync(User);
-    var blog = Model.BlogPostValue;
+    var user = await AccountService.GetUserAsync(User);
 }
 
 <div class="container">

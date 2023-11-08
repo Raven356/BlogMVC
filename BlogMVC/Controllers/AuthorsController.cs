@@ -1,10 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using MediatR;
-using BlogMVC.BLL.AuthorsOperations.GetAuthorById;
-using BlogMVC.DAL.Models;
-using BlogMVC.BLL.AuthorsOperations.CreateAuthor;
-using BlogMVC.BLL.AuthorsOperations.AuthorsService;
+using BlogMVC.BLL.Services.AuthorsService;
+using BlogMVC.Models;
 
 namespace BlogMVC.Controllers
 {
@@ -20,7 +17,7 @@ namespace BlogMVC.Controllers
         // GET: Authors/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            var author = await _authorsService.GetAuthorById(new GetAuthorByIdRequest { Id = id});
+            var author = await _authorsService.GetAuthorById(id);
 
             return View(author);
         }
@@ -34,16 +31,15 @@ namespace BlogMVC.Controllers
         // POST: Authors/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,NickName")] Author author)
+        public async Task<IActionResult> Create([Bind("Id,NickName, UserId")] AuthorDTO author)
         {
             if (ModelState.IsValid)
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 author.UserId = userId;
-                await _authorsService.CreateAuthor(new CreateAuthorCommand { Author = author });
+                await _authorsService.CreateAuthor(author);
                 return RedirectToAction("Create", "BlogPosts");
             }
-            //ViewData["UserId"] = new SelectList(_context.Set<User>(), "Id", "Id", author.UserId);
             return View(author);
         }
     }

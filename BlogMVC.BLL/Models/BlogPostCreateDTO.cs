@@ -3,16 +3,16 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BlogMVC.BLL.Models
 {
-    public class BlogPostCreateViewModel
+    public class BlogPostCreateDTO
     {
         public int? Id { get; set; }
 
-        public string Title { get; set; }
+        public string Title { get; set; } = null!;
 
-        public string Text { get; set; }
+        public string Text { get; set; } = null!;
 
         [DisplayName("Category")]
-        public string CategoryName { get; set; }
+        public string CategoryName { get; set; } = null!;
 
         [DataType(DataType.Date)]
         public DateTime Date { get; set; }

@@ -7,9 +7,9 @@ namespace BlogMVC.DAL.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        public string Text { get; set; }
+        public string Text { get; set; } = null!;
 
-        public string? UserId { get; set; }
+        public string UserId { get; set; } = null!;
 
         public int BlogPostId { get; set; }
 

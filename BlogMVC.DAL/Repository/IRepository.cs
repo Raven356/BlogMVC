@@ -1,5 +1,4 @@
-﻿
-namespace BlogMVC.DAL.Repository
+﻿namespace BlogMVC.DAL.Repository
 {
     public interface IRepository<TEntity> : IDisposable where TEntity : class
     {
@@ -9,7 +8,7 @@ namespace BlogMVC.DAL.Repository
 
         Task Delete(int? id);
 
-        IEnumerable<TEntity> GetAll();
+        IQueryable<TEntity> GetAll();
 
         Task<TEntity> GetById(int? id);
 

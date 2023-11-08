@@ -1,15 +1,9 @@
 ﻿@using Microsoft.AspNetCore.Identity;
-@inject UserManager<BlogMVC.DAL.Models.User> UserManager;
 
-@model IEnumerable<BlogMVC.DAL.Models.BlogPost>
+@model IEnumerable<BlogPostDTO>
 
 @{
     ViewData["Title"] = "My fancy Blog MVC";
-}
-
-@if (User.Identity.IsAuthenticated)
-{
-    var user = await UserManager.GetUserAsync(User);
 }
 
 <div class="container">

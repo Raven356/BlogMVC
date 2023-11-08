@@ -1,9 +1,6 @@
-﻿using BlogMVC.DAL.Models;
-using MediatR;
-
-namespace BlogMVC.BLL.BlogPostOperations.GetAllBlogPosts
+﻿namespace BlogMVC.BLL.Models
 {
-    public class GetBlogPostsRequest : IRequest<List<BlogPost>>
+    public class GetBlogPostsDTO
     {
         public string? SearchTitle { get; set; }
 

@@ -1,17 +1,18 @@
-﻿using BlogMVC.DAL.Models;
+﻿using AutoMapper;
+using BlogMVC.BLL.Models;
+using BlogMVC.BLL.Services.AccountsService;
 using BlogMVC.Models;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 public class AccountController : Controller
 {
-    private readonly UserManager<User> _userManager;
-    private readonly SignInManager<User> _signInManager;
+    private readonly IAccountService _accountService;
+    private readonly IMapper _mapper;
 
-    public AccountController(UserManager<User> userManager, SignInManager<User> signInManager)
+    public AccountController(IAccountService accountService, IMapper mapper)
     {
-        _userManager = userManager;
-        _signInManager = signInManager;
+        _accountService = accountService;
+        _mapper = mapper;
     }
 
     
@@ -25,12 +26,11 @@ public class AccountController : Controller
     {
         if (ModelState.IsValid)
         {
-            var user = new User { UserName = model.Email, Email = model.Email, Name = model.Name, Surname = model.Surname };
-            var result = await _userManager.CreateAsync(user, model.Password);
+            var user = _mapper.Map<UserDTO>(model);
+            var result = await _accountService.Register(user, model.Password);
 
             if (result.Succeeded)
             {
-                await _signInManager.SignInAsync(user, isPersistent: false);
                 return RedirectToAction("Index", "BlogPosts");
             }
 
@@ -53,8 +53,7 @@ public class AccountController : Controller
     {
         if (ModelState.IsValid)
         {
-            var result = await _signInManager
-                .PasswordSignInAsync(model.Login, model.Password, isPersistent: false, lockoutOnFailure: false);
+            var result = await _accountService.Login(_mapper.Map<LoginDTO>(model));
 
             if (result.Succeeded)
             {
@@ -69,7 +68,7 @@ public class AccountController : Controller
     [HttpGet]
     public async Task<IActionResult> Logout()
     {
-        await _signInManager.SignOutAsync();
+        await _accountService.Logout();
         return RedirectToAction("Index", "BlogPosts");
     }
 }

@@ -1,6 +1,6 @@
-﻿namespace BlogMVC.Models
+﻿namespace BlogMVC.BLL.Models
 {
-    public class LoginViewModel
+    public class LoginDTO
     {
         public string Login { get; set; } = null!;
 

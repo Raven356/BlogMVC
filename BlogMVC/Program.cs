@@ -1,11 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using BlogMVC.BLL;
+using BlogMVC;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("BlogMVCContext") 
     ?? throw new InvalidOperationException("Connection string 'BlogMVCContext' not found.");
 DependencyResolver.Configure(builder.Services, connectionString);
+
+builder.Services.AddAutoMapper(typeof(WebMappingProfile).Assembly);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

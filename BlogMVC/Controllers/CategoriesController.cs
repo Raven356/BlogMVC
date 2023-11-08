@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using BlogMVC.BLL.CategoriesOperations;
-using BlogMVC.BLL.CategoriesOperations.CategoriesService;
+using BlogMVC.BLL.Services.CategoriesService;
 
 namespace BlogMVC.Controllers
 {
@@ -16,7 +15,7 @@ namespace BlogMVC.Controllers
         // GET: Categories/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            var category = await _categoriesService.GetCategoryById(new GetCategoriesByIdRequest { Id = id });
+            var category = await _categoriesService.GetCategoryById(id);
             if (category == null)
             {
                 return NotFound();

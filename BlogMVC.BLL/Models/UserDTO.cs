@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace BlogMVC.DAL.Models
+namespace BlogMVC.Models
 {
-    public class User : IdentityUser
+    public class UserDTO : IdentityUser
     {
         public string Name { get; set; } = null!;
 

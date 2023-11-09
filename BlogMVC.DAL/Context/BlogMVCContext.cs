@@ -13,12 +13,16 @@ namespace BlogMVC.DAL.Context
 
         public DbSet<Author> Author { get; set; } = default!;
 
-        public DbSet<BlogPost> BlogPost { get; set; } = null!;
+        public DbSet<BlogPost>? BlogPost { get; set; }
 
-        public DbSet<Category> Category { get; set; } = null!;
+        public DbSet<Category>? Category { get; set; }
 
-        public DbSet<Comment> Comment { get; set; } = null!;
+        public DbSet<Comment>? Comment { get; set; }
 
-        public DbSet<User> User { get; set; } = null!;
+        public DbSet<User>? User { get; set; }
+
+        public DbSet<Tags>? Tags { get; set; }
+
+        public DbSet<TagToBlogPost>? TagToBlogPosts { get; set; }
     }
 }

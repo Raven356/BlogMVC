@@ -15,10 +15,11 @@ namespace BlogMVC.DAL.Repository
             _dbSet = _context.Set<TEntity>();
         }
 
-        public async Task Add(TEntity entity)
+        public async Task<TEntity> Add(TEntity entity)
         {
-            await _dbSet.AddAsync(entity);
+            var created = await _dbSet.AddAsync(entity);
             await _context.SaveChangesAsync();
+            return created.Entity;
         }
 
         public async Task Delete(int? id)

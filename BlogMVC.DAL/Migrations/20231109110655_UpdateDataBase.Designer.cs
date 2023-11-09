@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogMVC.Migrations
 {
     [DbContext(typeof(BlogMVCContext))]
-    [Migration("20231102122958_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20231109110655_UpdateDataBase")]
+    partial class UpdateDataBase
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -24,7 +24,7 @@ namespace BlogMVC.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("BlogMVC.Models.Author", b =>
+            modelBuilder.Entity("BlogMVC.DAL.Models.Author", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -33,6 +33,7 @@ namespace BlogMVC.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("NickName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
@@ -46,7 +47,7 @@ namespace BlogMVC.Migrations
                     b.ToTable("Author");
                 });
 
-            modelBuilder.Entity("BlogMVC.Models.BlogPost", b =>
+            modelBuilder.Entity("BlogMVC.DAL.Models.BlogPost", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -80,7 +81,7 @@ namespace BlogMVC.Migrations
                     b.ToTable("BlogPost");
                 });
 
-            modelBuilder.Entity("BlogMVC.Models.Category", b =>
+            modelBuilder.Entity("BlogMVC.DAL.Models.Category", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -97,7 +98,7 @@ namespace BlogMVC.Migrations
                     b.ToTable("Category");
                 });
 
-            modelBuilder.Entity("BlogMVC.Models.Comment", b =>
+            modelBuilder.Entity("BlogMVC.DAL.Models.Comment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -124,7 +125,47 @@ namespace BlogMVC.Migrations
                     b.ToTable("Comment");
                 });
 
-            modelBuilder.Entity("BlogMVC.Models.User", b =>
+            modelBuilder.Entity("BlogMVC.DAL.Models.Tags", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Tags");
+                });
+
+            modelBuilder.Entity("BlogMVC.DAL.Models.TagToBlogPost", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int>("BlogPostId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TagId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BlogPostId");
+
+                    b.HasIndex("TagId");
+
+                    b.ToTable("TagToBlogPosts");
+                });
+
+            modelBuilder.Entity("BlogMVC.DAL.Models.User", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -330,9 +371,9 @@ namespace BlogMVC.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("BlogMVC.Models.Author", b =>
+            modelBuilder.Entity("BlogMVC.DAL.Models.Author", b =>
                 {
-                    b.HasOne("BlogMVC.Models.User", "User")
+                    b.HasOne("BlogMVC.DAL.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -341,15 +382,15 @@ namespace BlogMVC.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BlogMVC.Models.BlogPost", b =>
+            modelBuilder.Entity("BlogMVC.DAL.Models.BlogPost", b =>
                 {
-                    b.HasOne("BlogMVC.Models.Author", "Author")
+                    b.HasOne("BlogMVC.DAL.Models.Author", "Author")
                         .WithMany()
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BlogMVC.Models.Category", "Category")
+                    b.HasOne("BlogMVC.DAL.Models.Category", "Category")
                         .WithMany()
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -360,21 +401,40 @@ namespace BlogMVC.Migrations
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("BlogMVC.Models.Comment", b =>
+            modelBuilder.Entity("BlogMVC.DAL.Models.Comment", b =>
                 {
-                    b.HasOne("BlogMVC.Models.BlogPost", "BlogPost")
+                    b.HasOne("BlogMVC.DAL.Models.BlogPost", "BlogPost")
                         .WithMany()
                         .HasForeignKey("BlogPostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BlogMVC.Models.User", "User")
+                    b.HasOne("BlogMVC.DAL.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
 
                     b.Navigation("BlogPost");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BlogMVC.DAL.Models.TagToBlogPost", b =>
+                {
+                    b.HasOne("BlogMVC.DAL.Models.BlogPost", "BlogPost")
+                        .WithMany()
+                        .HasForeignKey("BlogPostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BlogMVC.DAL.Models.Tags", "Tags")
+                        .WithMany()
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BlogPost");
+
+                    b.Navigation("Tags");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -388,7 +448,7 @@ namespace BlogMVC.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("BlogMVC.Models.User", null)
+                    b.HasOne("BlogMVC.DAL.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -397,7 +457,7 @@ namespace BlogMVC.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("BlogMVC.Models.User", null)
+                    b.HasOne("BlogMVC.DAL.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -412,7 +472,7 @@ namespace BlogMVC.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BlogMVC.Models.User", null)
+                    b.HasOne("BlogMVC.DAL.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -421,7 +481,7 @@ namespace BlogMVC.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("BlogMVC.Models.User", null)
+                    b.HasOne("BlogMVC.DAL.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)

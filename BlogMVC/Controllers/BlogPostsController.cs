@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Authorization;
 using BlogMVC.BLL.Models;
 using BlogMVC.BLL.Services.BlogPostService;
 using AutoMapper;
+using BlogMVC.BLL.Services.TagsService;
+using System.Reflection.Metadata;
+using System.Text;
 
 namespace BlogMVC.Controllers
 {
@@ -10,27 +13,40 @@ namespace BlogMVC.Controllers
     {
         private readonly IBlogPostService _blogPostService;
         private readonly IMapper _mapper;
+        private readonly ITagsService _tagsService;
 
-        public BlogPostsController(IBlogPostService blogPostService, IMapper mapper)
+        public BlogPostsController(IBlogPostService blogPostService, IMapper mapper, ITagsService tagsService)
         {
             _blogPostService = blogPostService;
             _mapper = mapper;
+            _tagsService = tagsService;
         }
 
         // GET: BlogPosts
-        public async Task<IActionResult> Index(string? searchTitle, string? searchCategory, string? searchAuthor)
+        public async Task<IActionResult> Index(string? searchTitle, string? searchCategory
+            , string? searchAuthor, string? tagName)
         {
             var blogs = await _blogPostService.GetAllBlogPosts(
                 new GetBlogPostsDTO { SearchAuthor = searchAuthor
                 , SearchCategory = searchCategory
-                , SearchTitle = searchTitle });
-            return View(blogs);
+                , SearchTitle = searchTitle, TagName = tagName });
+            List<BlogPostWithTagsDTO> blogPostWithTags = new List<BlogPostWithTagsDTO>();
+            foreach (var blog in blogs)
+            {
+                blogPostWithTags
+                    .Add(new BlogPostWithTagsDTO 
+                    { 
+                        BlogPost = blog, Tags = await _tagsService.GetTagsByBlogPostId(blog.Id)
+                    });
+            }
+            return View(blogPostWithTags);
         }
 
         // GET: BlogPosts/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             var blogPostWithComments = await _blogPostService.GetBlogPostById(id);
+            blogPostWithComments.Tags = await _tagsService.GetTagsByBlogPostId(blogPostWithComments.BlogPostValue.Id);
             return View(blogPostWithComments);
         }
 
@@ -73,13 +89,15 @@ namespace BlogMVC.Controllers
         // POST: BlogPosts/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Text,CategoryName,Date,AuthorId")] BlogPostCreateDTO blogPost)
+        public async Task<IActionResult> Create([Bind("Id,Title,Text,CategoryName,Tags,Date,AuthorId")] BlogPostCreateDTO blogPost)
         {
             if (ModelState.IsValid)
             {
                 int categoryId = await GetCategoryId(blogPost);
-                await _blogPostService.CreateNewBlogPost
+                var tags = blogPost.Tags.Split(" ", StringSplitOptions.RemoveEmptyEntries).AsEnumerable();
+                var blog = await _blogPostService.CreateNewBlogPost
                     (new CreateBlogPostDTO { CategoryId = categoryId, BlogPostCreateViewModel = blogPost });
+                await _tagsService.CreateTags(tags, blog.Id);
                 return RedirectToAction(nameof(Index));
             }
             var result = await GetAuthorUserId();
@@ -106,6 +124,13 @@ namespace BlogMVC.Controllers
             var blogPostCreateDto = _mapper.Map<BlogPostCreateDTO>(blogPost);
             blogPostCreateDto.CategoryName = categoryName;
             blogPostCreateDto.AuthorId = authorId;
+            var tags = await _tagsService.GetTagsByBlogPostId(blogPostCreateDto.Id);
+            StringBuilder stringBuilder = new StringBuilder();
+            foreach (var tag in tags)
+            {
+                stringBuilder.Append(tag.Name + " ");
+            }
+            blogPostCreateDto.Tags = stringBuilder.ToString();
             return View(blogPostCreateDto);
         }
 
@@ -119,7 +144,7 @@ namespace BlogMVC.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id
-            , [Bind("Id,Title,Text,CategoryName,Date,AuthorId")] BlogPostCreateDTO blogPost)
+            , [Bind("Id,Title,Text,CategoryName,Date,AuthorId,Tags")] BlogPostCreateDTO blogPost)
         {
             if (id != blogPost.Id)
             {
@@ -131,6 +156,8 @@ namespace BlogMVC.Controllers
                 int categoryId = await GetCategoryId(blogPost);
                 await _blogPostService
                     .EditBlogPost(new EditBlogPostDTO { CategoryId = categoryId, CreateViewModel = blogPost });
+                await _tagsService.UpdateTags(blogPost.Tags.Split(" ", StringSplitOptions.RemoveEmptyEntries).ToList()
+                    , (int)blogPost.Id);
                 return RedirectToAction(nameof(Details), new {id = blogPost.Id});
             }
             ViewData["AuthorId"] = await GetAuthorId();

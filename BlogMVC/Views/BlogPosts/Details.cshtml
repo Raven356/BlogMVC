@@ -21,6 +21,16 @@
                     <div class="d-flex justify-content-between">
                         <small class="text-muted">Author: @Model.BlogPostValue.Author.NickName</small>
                     </div>
+                    @if (Model.Tags.Count() > 0)
+                    {
+                        <p class="card-text">
+                            <strong>Tags:</strong>
+                            @foreach (var tag in Model.Tags)
+                            {
+                                <a asp-action="Index" asp-route-tagName="@tag.Name">@tag.Name</a>
+                            }
+                        </p>
+                    }
                 </div>
             </div>
 
@@ -45,6 +55,7 @@
             <form asp-controller="BlogPosts" asp-action="Details" method="post" class="mt-4">
                 <input type="hidden" asp-for="NewComment.BlogPostId" value="@Model.BlogPostValue.Id" />
                 <input type="hidden" asp-for="CommentList" value="@Model.CommentList" />
+                <input type="hidden" asp-for="Tags" value="@Model.Tags" />
                 <input type="hidden" asp-for="BlogPostValue.Text" value="@Model.BlogPostValue.Text" />
                 <input type="hidden" asp-for="BlogPostValue.Title" value="@Model.BlogPostValue.Title" />
                 <input type="hidden" asp-for="BlogPostValue.Date" value="@Model.BlogPostValue.Date" />

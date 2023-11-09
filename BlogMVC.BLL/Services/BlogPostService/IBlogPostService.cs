@@ -1,4 +1,5 @@
 ﻿using BlogMVC.BLL.Models;
+using BlogMVC.DAL.Models;
 using BlogMVC.Models;
 using System.Security.Claims;
 
@@ -8,7 +9,7 @@ namespace BlogMVC.BLL.Services.BlogPostService
     {
         Task<BlogPostWithCommentsDTO> AddNewComment(BlogPostWithCommentsDTO request);
 
-        Task CreateNewBlogPost(CreateBlogPostDTO request);
+        Task<BlogPost> CreateNewBlogPost(CreateBlogPostDTO request);
 
         Task DeleteBlogPost(int request);
 

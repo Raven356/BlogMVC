@@ -2,6 +2,7 @@
 using BlogMVC.BLL.Services.AuthorsService;
 using BlogMVC.BLL.Services.BlogPostService;
 using BlogMVC.BLL.Services.CategoriesService;
+using BlogMVC.BLL.Services.TagsService;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BlogMVC.BLL
@@ -16,7 +17,8 @@ namespace BlogMVC.BLL
             services.AddScoped<IBlogPostService, BlogPostService>();
             services.AddScoped<ICategoriesService, CategoriesService>();
             services.AddScoped<IAccountService, AccountService>();
-            
+            services.AddScoped<ITagsService, TagsService>();
+
 
             services.AddAutoMapper(typeof(CoreMappingProfile).Assembly);
         }

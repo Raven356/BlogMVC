@@ -9,5 +9,7 @@ namespace BlogMVC.BLL.Models
         public IEnumerable<Comment> CommentList { get; set; } = null!;
 
         public Comment NewComment { get; set; } = null!;
+
+        public IEnumerable<Tags> Tags { get; set; } = null!;
     }
 }

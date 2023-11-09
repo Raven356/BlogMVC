@@ -16,6 +16,10 @@ namespace BlogMVC.DAL.Context
 
         public DbSet<User> User { get; set; }
 
+        public DbSet<Tags> Tags { get; set; }
+
+        public DbSet<TagToBlogPost> TagToBlogPosts { get; set; }
+
         int SaveChanges();
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);

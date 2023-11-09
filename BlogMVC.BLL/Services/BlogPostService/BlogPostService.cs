@@ -16,6 +16,8 @@ namespace BlogMVC.BLL.Services.BlogPostService
         private readonly IRepository<Comment> _commentRepository;
         private readonly IRepository<User> _userRepository;
         private readonly IRepository<Author> _authorRepository;
+        private readonly IRepository<Tags> _tagsRepository;
+        private readonly IRepository<TagToBlogPost> _tagToBlogPostRepository;
         private readonly IMapper _mapper;
         private readonly UserManager<User> _userManager;
 
@@ -25,6 +27,8 @@ namespace BlogMVC.BLL.Services.BlogPostService
             IRepository<User> userRepository,
             IRepository<BlogPost> blogPostRepository,
             IRepository<Author> authorRepository,
+            IRepository<Tags> tagsRepository,
+            IRepository<TagToBlogPost> tagToBlogPostRepository,
             IMapper mapper,
             UserManager<User> userManager)
         {
@@ -35,6 +39,8 @@ namespace BlogMVC.BLL.Services.BlogPostService
             _authorRepository = authorRepository;
             _mapper = mapper;
             _userManager = userManager;
+            _tagsRepository = tagsRepository;
+            _tagToBlogPostRepository = tagToBlogPostRepository;
         }
 
         public async Task<BlogPostWithCommentsDTO> AddNewComment(BlogPostWithCommentsDTO request)
@@ -50,10 +56,9 @@ namespace BlogMVC.BLL.Services.BlogPostService
             return request;
         }
 
-        public async Task CreateNewBlogPost(CreateBlogPostDTO request)
+        public async Task<BlogPost> CreateNewBlogPost(CreateBlogPostDTO request)
         {
-            await _blogPostRepository.Add(_mapper.Map<BlogPost>(request));
-            return;
+            return await _blogPostRepository.Add(_mapper.Map<BlogPost>(request));
         }
 
         public async Task DeleteBlogPost(int request)
@@ -73,6 +78,13 @@ namespace BlogMVC.BLL.Services.BlogPostService
         public async Task<List<BlogPostDTO>> GetAllBlogPosts(GetBlogPostsDTO request)
         {
             var blogs = _blogPostRepository.GetAll();
+
+            if (!string.IsNullOrEmpty(request.TagName))
+            {
+                var tag = await _tagsRepository.GetAll().Where(t => t.Name == request.TagName).FirstAsync();
+                var tagToRepo = _tagToBlogPostRepository.GetAll().Where(t => t.TagId == tag.Id);
+                blogs = blogs.Where(b => tagToRepo.Select(t => t.BlogPostId).Contains(b.Id));
+            }
 
             if (!string.IsNullOrEmpty(request.SearchTitle))
             {

@@ -2,7 +2,7 @@
 {
     public interface IRepository<TEntity> : IDisposable where TEntity : class
     {
-        Task Add(TEntity entity);
+        Task<TEntity> Add(TEntity entity);
 
         Task Update(TEntity entity);
 

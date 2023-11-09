@@ -7,5 +7,7 @@
         public string? SearchCategory { get; set; }
 
         public string? SearchAuthor { get; set; }
+
+        public string? TagName { get; set; }
     }
 }

@@ -7,8 +7,6 @@ namespace BlogMVC.BLL.Services.BlogPostService
 {
     public interface IBlogPostService
     {
-        Task<BlogPostWithCommentsDTO> AddNewComment(BlogPostWithCommentsDTO request);
-
         Task<BlogPost> CreateNewBlogPost(CreateBlogPostDTO request);
 
         Task DeleteBlogPost(int request);

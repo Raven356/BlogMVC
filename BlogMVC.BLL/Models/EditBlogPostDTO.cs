@@ -4,6 +4,6 @@
     {
         public BlogPostCreateDTO CreateViewModel { get; set; } = null!;
 
-        public int CategoryId { get; set; }
+        public int? CategoryId { get; set; }
     }
 }

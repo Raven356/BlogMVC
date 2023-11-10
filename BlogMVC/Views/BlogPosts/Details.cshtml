@@ -37,7 +37,7 @@
             <div class="d-flex justify-content-center mt-3">
                 @if (user != null && user.Id.Equals(Model.BlogPostValue.Author.UserId))
                 {
-                    <a asp-action="Edit" asp-route-id="@Model?.BlogPostValue.Id" class="btn btn-sm btn-primary w-25 mx-2">Edit</a>
+                    <a asp-controller="Tags" asp-action="GetByBlogId" asp-route-id="@Model?.BlogPostValue.Id" class="btn btn-sm btn-primary w-25 mx-2">Edit</a>
                     <a asp-action="Delete" asp-route-id="@Model?.BlogPostValue.Id" class="btn btn-sm btn-danger w-25 mx-2">Delete</a>
                 }
             </div>
@@ -52,7 +52,7 @@
                 </div>
             }
 
-            <form asp-controller="BlogPosts" asp-action="Details" method="post" class="mt-4">
+            <form asp-controller="Comments" asp-action="Create" method="post" class="mt-4">
                 <input type="hidden" asp-for="NewComment.BlogPostId" value="@Model.BlogPostValue.Id" />
                 <input type="hidden" asp-for="CommentList" value="@Model.CommentList" />
                 <input type="hidden" asp-for="Tags" value="@Model.Tags" />

@@ -1,5 +1,7 @@
-﻿using BlogMVC.DAL.Models;
+﻿using AutoMapper;
+using BlogMVC.DAL.Models;
 using BlogMVC.DAL.Repository;
+using BlogMVC.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace BlogMVC.BLL.Services.TagsService
@@ -8,11 +10,17 @@ namespace BlogMVC.BLL.Services.TagsService
     {
         private readonly IRepository<Tags> _tagsRepository;
         private readonly IRepository<TagToBlogPost> _tagsToBlogPostRepository;
+        private readonly IRepository<BlogPost> _blogPostRepository;
+        private readonly IMapper _mapper;
 
-        public TagsService(IRepository<Tags> tagsRepository, IRepository<TagToBlogPost> tagsToBlogPostRepository)
+        public TagsService(IRepository<Tags> tagsRepository
+            , IRepository<TagToBlogPost> tagsToBlogPostRepository
+            , IRepository<BlogPost> blogPostRepository, IMapper mapper)
         {
             _tagsRepository = tagsRepository;
             _tagsToBlogPostRepository = tagsToBlogPostRepository;
+            _blogPostRepository = blogPostRepository;
+            _mapper = mapper;
         }
 
         public async Task CreateTags(IEnumerable<string> tags, int blogId)
@@ -75,6 +83,16 @@ namespace BlogMVC.BLL.Services.TagsService
             var tagToBlogPost = _tagsToBlogPostRepository.GetAll().Where(t => t.BlogPostId == id);
             var tags = _tagsRepository.GetAll().Where(t => tagToBlogPost.Select(tb => tb.TagId).Contains(t.Id));
             return await tags.ToListAsync();
+        }
+
+        public async Task<IEnumerable<BlogPostDTO>> GetBlogPostsByTag(string tag)
+        {
+            var tags = await _tagsRepository.GetAll().Where(t => t.Name == tag).FirstAsync();
+            var tagToRepo = _tagsToBlogPostRepository.GetAll().Where(t => t.TagId == tags.Id);
+            var blogs = _blogPostRepository.GetAll().Where(b => tagToRepo.Select(t => t.BlogPostId).Contains(b.Id));
+            var result = new List<BlogPostDTO>();
+            await blogs.OrderBy(b => b.Title).ForEachAsync(b => result.Add(_mapper.Map<BlogPostDTO>(b)));
+            return result;
         }
     }
 }

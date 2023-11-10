@@ -55,7 +55,7 @@
                                 <strong>Tags:</strong>
                                 @foreach (var tag in item.Tags)
                                 {
-                                    <a asp-action="Index" asp-route-tagName="@tag.Name">@tag.Name</a>
+                                    <a asp-controller="Tags" asp-action="Index" asp-route-tagName="@tag.Name">@tag.Name</a>
                                 }
                             </p>
                         }

@@ -1,13 +1,8 @@
-﻿@using Microsoft.AspNetCore.Identity;
-@inject BlogMVC.BLL.Services.AccountsService.IAccountService AccountsService;
-@model AuthorDTO
+﻿@model AuthorDTO
 
 @{
     ViewData["Title"] = "Create";
-    var user = await AccountsService.GetUserAsync(User);
 }
-
-@{}
 
 <h1 class="text-center">Register as author</h1>
 <hr />
@@ -19,7 +14,6 @@
                 <label asp-for="NickName" class="control-label"></label>
                 <input asp-for="NickName" class="form-control" />
                 <span asp-validation-for="NickName" class="text-danger"></span>
-                <input asp-for="UserId" type="hidden" value=@user.Id />
             </div>
             <div class="form-group d-flex justify-content-center mt-2">
                 <input type="submit" value="Create" class="btn btn-primary" />

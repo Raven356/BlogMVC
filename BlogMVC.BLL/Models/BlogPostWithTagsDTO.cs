@@ -1,5 +1,4 @@
-﻿using BlogMVC.DAL.Models;
-using BlogMVC.Models;
+﻿using BlogMVC.Models;
 
 namespace BlogMVC.BLL.Models
 {
@@ -7,6 +6,6 @@ namespace BlogMVC.BLL.Models
     {
         public BlogPostDTO BlogPost { get; set; } = null!;
 
-        public IEnumerable<Tags> Tags { get; set; } = Enumerable.Empty<Tags>();
+        public IEnumerable<TagsDTO> Tags { get; set; } = Enumerable.Empty<TagsDTO>();
     }
 }

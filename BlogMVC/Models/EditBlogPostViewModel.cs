@@ -1,9 +1,9 @@
-﻿using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel;
 
-namespace BlogMVC.BLL.Models
+namespace BlogMVC.Models
 {
-    public class BlogPostCreateDTO
+    public class EditBlogPostViewModel
     {
         public int? Id { get; set; }
 

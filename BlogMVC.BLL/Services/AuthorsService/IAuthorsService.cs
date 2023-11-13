@@ -6,6 +6,6 @@ namespace BlogMVC.BLL.Services.AuthorsService
     {
         Task CreateAuthor(AuthorDTO request);
 
-        Task<AuthorDTO> GetAuthorById(int? request);
+        Task<AuthorDTO> GetAuthorById(int? id);
     }
 }

@@ -1,8 +1,8 @@
-﻿using BlogMVC.Models;
+﻿using BlogMVC.BLL.Models;
 
-namespace BlogMVC.BLL.Models
+namespace BlogMVC.Models
 {
-    public class BlogPostWithCommentsDTO
+    public class BlogPostWithCommentsViewModel
     {
         public BlogPostDTO BlogPostValue { get; set; } = null!;
 
@@ -11,5 +11,7 @@ namespace BlogMVC.BLL.Models
         public CommentDTO NewComment { get; set; } = null!;
 
         public IEnumerable<TagsDTO> Tags { get; set; } = null!;
+
+        public bool IsAuthor { get; set; } = default;
     }
 }

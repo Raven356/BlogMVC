@@ -1,10 +1,7 @@
-﻿@using Microsoft.AspNetCore.Identity;
-@inject BlogMVC.BLL.Services.AccountsService.IAccountService AccountService;
-@model BlogMVC.BLL.Models.BlogPostWithCommentsDTO
+﻿@model BlogPostWithCommentsViewModel
 
 @{
     ViewData["Title"] = "Details";
-    var user = await AccountService.GetUserAsync(User);
 }
 
 <div class="container">
@@ -35,10 +32,12 @@
             </div>
 
             <div class="d-flex justify-content-center mt-3">
-                @if (user != null && user.Id.Equals(Model.BlogPostValue.Author.UserId))
+                @if (Model.IsAuthor)
                 {
-                    <a asp-controller="Tags" asp-action="GetByBlogId" asp-route-id="@Model?.BlogPostValue.Id" class="btn btn-sm btn-primary w-25 mx-2">Edit</a>
-                    <a asp-action="Delete" asp-route-id="@Model?.BlogPostValue.Id" class="btn btn-sm btn-danger w-25 mx-2">Delete</a>
+                    <a asp-action="Edit" 
+                        asp-route-id="@Model?.BlogPostValue.Id" class="btn btn-sm btn-primary w-25 mx-2">Edit</a>
+                    <a asp-action="Delete" 
+                        asp-route-id="@Model?.BlogPostValue.Id" class="btn btn-sm btn-danger w-25 mx-2">Delete</a>
                 }
             </div>
 
@@ -53,27 +52,10 @@
             }
 
             <form asp-controller="Comments" asp-action="Create" method="post" class="mt-4">
-                <input type="hidden" asp-for="NewComment.BlogPostId" value="@Model.BlogPostValue.Id" />
-                <input type="hidden" asp-for="CommentList" value="@Model.CommentList" />
-                <input type="hidden" asp-for="Tags" value="@Model.Tags" />
-                <input type="hidden" asp-for="BlogPostValue.Text" value="@Model.BlogPostValue.Text" />
-                <input type="hidden" asp-for="BlogPostValue.Title" value="@Model.BlogPostValue.Title" />
-                <input type="hidden" asp-for="BlogPostValue.Date" value="@Model.BlogPostValue.Date" />
-                <input type="hidden" asp-for="BlogPostValue.AuthorId" value="@Model.BlogPostValue.AuthorId" />
-                <input type="hidden" asp-for="BlogPostValue.CategoryId" value="@Model.BlogPostValue.CategoryId" />
-                <input type="hidden" asp-for="BlogPostValue.Id" value="@Model.BlogPostValue.Id" />
-                <input type="hidden" asp-for="BlogPostValue.Author.Id" value="@Model.BlogPostValue.Author.Id" />
-                <input type="hidden" asp-for="BlogPostValue.Author.NickName" value="@Model.BlogPostValue.Author.NickName" />
-                <input type="hidden" asp-for="BlogPostValue.Author.UserId" value="@Model.BlogPostValue.Author.UserId" />
-                <input type="hidden" asp-for="BlogPostValue.Category.Id" value="@Model.BlogPostValue.Category.Id" />
-                <input type="hidden" asp-for="BlogPostValue.Category.Name" value="@Model.BlogPostValue.Category.Name" />
-                @if (user != null)
-                {
-                    <input type="hidden" asp-for="NewComment.UserId" value="@user.Id" />
-                }
                 <div class="form-group mb-3">
                     <label asp-for="NewComment.Text"></label>
                     <textarea class="form-control" asp-for="NewComment.Text"></textarea>
+                    <input type="hidden" asp-for="NewComment.BlogPostId" value="@Model.BlogPostValue.Id" />
                 </div>
                 <button type="submit" class="btn btn-primary d-block mx-auto">Submit Comment</button>
             </form>

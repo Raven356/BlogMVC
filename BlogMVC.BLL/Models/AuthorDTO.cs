@@ -1,5 +1,4 @@
-﻿using BlogMVC.DAL.Models;
-
+﻿
 namespace BlogMVC.Models
 {
     public class AuthorDTO
@@ -8,8 +7,6 @@ namespace BlogMVC.Models
 
         public string NickName { get; set; } = null!;
 
-        public string UserId { get; set; } = null!;
-
-        public User? User { get; set; }
+        public string? UserId { get; set; }
     }
 }

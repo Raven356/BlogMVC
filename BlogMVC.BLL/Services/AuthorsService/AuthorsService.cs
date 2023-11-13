@@ -25,9 +25,9 @@ namespace BlogMVC.BLL.Services.AuthorsService
             return;
         }
 
-        public async Task<AuthorDTO> GetAuthorById(int? request)
+        public async Task<AuthorDTO> GetAuthorById(int? id)
         {
-            var author = await _repository.GetById(request);
+            var author = await _repository.GetById(id);
 
             author.User = await _userRepository.GetById(author.UserId);
 

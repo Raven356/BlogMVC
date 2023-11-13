@@ -9,23 +9,13 @@ namespace BlogMVC.BLL
     {
         public CoreMappingProfile() 
         {
-            CreateMap<CreateBlogPostDTO, BlogPost>()
-                .ForMember(dst => dst.AuthorId, opt => opt.MapFrom(s => s.BlogPostCreateViewModel.AuthorId))
-                .ForMember(dst => dst.Id, opt => opt.Ignore())
-                .ForMember(dst => dst.Text, opt => opt.MapFrom(s => s.BlogPostCreateViewModel.Text))
-                .ForMember(dst => dst.CategoryId, opt => opt.MapFrom(s => s.CategoryId))
-                .ForMember(dst => dst.Date, opt => opt.MapFrom(s => s.BlogPostCreateViewModel.Date))
-                .ForMember(dst => dst.Title, opt => opt.MapFrom(s => s.BlogPostCreateViewModel.Title))
-                .ForMember(dst => dst.Author, opt => opt.Ignore())
-                .ForMember(dst => dst.Category, opt => opt.Ignore());
-
             CreateMap<EditBlogPostDTO, BlogPost>()
-                .ForMember(dst => dst.AuthorId, opt => opt.MapFrom(s => s.CreateViewModel.AuthorId))
-                .ForMember(dst => dst.Id, opt => opt.Ignore())
-                .ForMember(dst => dst.Text, opt => opt.MapFrom(s => s.CreateViewModel.Text))
+                .ForMember(dst => dst.AuthorId, opt => opt.MapFrom(s => s.AuthorId))
+                .ForMember(dst => dst.Id, opt => opt.MapFrom(s => s.Id))
+                .ForMember(dst => dst.Text, opt => opt.MapFrom(s => s.Text))
                 .ForMember(dst => dst.CategoryId, opt => opt.MapFrom(s => s.CategoryId))
-                .ForMember(dst => dst.Date, opt => opt.MapFrom(s => s.CreateViewModel.Date))
-                .ForMember(dst => dst.Title, opt => opt.MapFrom(s => s.CreateViewModel.Title))
+                .ForMember(dst => dst.Date, opt => opt.MapFrom(s => s.Date))
+                .ForMember(dst => dst.Title, opt => opt.MapFrom(s => s.Title))
                 .ForMember(dst => dst.Author, opt => opt.Ignore())
                 .ForMember(dst => dst.Category, opt => opt.Ignore());
 
@@ -33,7 +23,14 @@ namespace BlogMVC.BLL
             CreateMap<BlogPost, BlogPostDTO>().ReverseMap();
             CreateMap<Category, CategoryDTO>().ReverseMap();
             CreateMap<User, UserDTO>().ReverseMap();
-            CreateMap<BlogPost, BlogPostCreateDTO>();
+            CreateMap<BlogPost, CreateBlogPostDTO>().ReverseMap();
+
+            CreateMap<Tags, TagsDTO>();
+            CreateMap<CommentDTO, Comment>()
+                .ForMember(dst => dst.BlogPost, opt => opt.Ignore())
+                .ReverseMap();
+            CreateMap<BlogPost, BlogPostAndCategoryNameDTO>()
+                .ForMember(dst => dst.CategoryName, opt => opt.Ignore());
         }
     }
 }

@@ -25,6 +25,10 @@ namespace BlogMVC.BLL.Services.TagsService
 
         public async Task CreateTags(IEnumerable<string> tags, int blogId)
         {
+            if (tags == null)
+            {
+                return;
+            }
             var existing = _tagsRepository.GetAll();
             foreach (var tag in tags)
             {
@@ -37,20 +41,29 @@ namespace BlogMVC.BLL.Services.TagsService
                 {
                     newTag = existing.Where(t => t.Name == tag).First();
                 }
-                await _tagsToBlogPostRepository.Add(new TagToBlogPost { BlogPostId = blogId, TagId =  newTag.Id });
+                await _tagsToBlogPostRepository
+                    .Add(new TagToBlogPost { BlogPostId = blogId, TagId =  newTag.Id });
             }
         }
 
         public async Task UpdateTags(IEnumerable<string> tags, int blogId)
         {
-            if (tags.Count() < 0)
+            if (tags == null || tags.Count() <= 0)
             {
-                var deleteId = _tagsToBlogPostRepository.GetAll().Where(t => t.BlogPostId == blogId).Select(t => t.Id);
-                await deleteId.ForEachAsync(d => _tagsRepository.Delete(d));
+                var deleteId = await _tagsToBlogPostRepository.GetAll()
+                    .Where(t => t.BlogPostId == blogId)
+                    .Select(t => t.TagId).ToListAsync();
+                foreach (var id in deleteId)
+                {
+                    await _tagsRepository.Delete(id);
+                }
+                return;
             }
+
             var existing = _tagsRepository.GetAll();
             var tagToBlog = _tagsToBlogPostRepository.GetAll();
             var existingTags = _tagsToBlogPostRepository.GetAll().Where(t => t.BlogPostId == blogId);
+
             List<int> addedId = new List<int>();
             foreach (var tag in tags)
             {
@@ -65,7 +78,8 @@ namespace BlogMVC.BLL.Services.TagsService
                 }
                 if (tagToBlog.Where(t => t.TagId == newTag.Id && t.BlogPostId == blogId).Count() == 0)
                 {
-                    await _tagsToBlogPostRepository.Add(new TagToBlogPost { BlogPostId = blogId, TagId = newTag.Id });
+                    await _tagsToBlogPostRepository
+                        .Add(new TagToBlogPost { BlogPostId = blogId, TagId = newTag.Id });
                 }
                 addedId.Add(newTag.Id);
 
@@ -81,17 +95,22 @@ namespace BlogMVC.BLL.Services.TagsService
         public async Task<IEnumerable<Tags>> GetTagsByBlogPostId(int? id)
         {
             var tagToBlogPost = _tagsToBlogPostRepository.GetAll().Where(t => t.BlogPostId == id);
-            var tags = _tagsRepository.GetAll().Where(t => tagToBlogPost.Select(tb => tb.TagId).Contains(t.Id));
+            var tags = _tagsRepository.GetAll()
+                .Where(t => tagToBlogPost.Select(tb => tb.TagId).Contains(t.Id));
             return await tags.ToListAsync();
         }
 
         public async Task<IEnumerable<BlogPostDTO>> GetBlogPostsByTag(string tag)
         {
-            var tags = await _tagsRepository.GetAll().Where(t => t.Name == tag).FirstAsync();
-            var tagToRepo = _tagsToBlogPostRepository.GetAll().Where(t => t.TagId == tags.Id);
-            var blogs = _blogPostRepository.GetAll().Where(b => tagToRepo.Select(t => t.BlogPostId).Contains(b.Id));
+            var tags = await _tagsRepository.GetAll()
+                .Where(t => t.Name == tag).FirstAsync();
+            var tagToRepo = _tagsToBlogPostRepository
+                .GetAll().Where(t => t.TagId == tags.Id);
+            var blogs = _blogPostRepository.GetAll()
+                .Where(b => tagToRepo.Select(t => t.BlogPostId).Contains(b.Id));
             var result = new List<BlogPostDTO>();
-            await blogs.OrderBy(b => b.Title).ForEachAsync(b => result.Add(_mapper.Map<BlogPostDTO>(b)));
+            await blogs.OrderBy(b => b.Title)
+                .ForEachAsync(b => result.Add(_mapper.Map<BlogPostDTO>(b)));
             return result;
         }
     }

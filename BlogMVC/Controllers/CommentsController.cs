@@ -2,6 +2,7 @@
 using BlogMVC.BLL.Services.ControllersService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace BlogMVC.Controllers
 {
@@ -17,14 +18,15 @@ namespace BlogMVC.Controllers
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(BlogPostWithCommentsDTO blogPostWithComments)
+        public async Task<IActionResult> Create(CommentDTO newComment)
         {
             if (ModelState.IsValid)
             {
-                if (!string.IsNullOrEmpty(blogPostWithComments.NewComment.Text))
+                if (!string.IsNullOrEmpty(newComment.Text))
                 {
-                    blogPostWithComments = await _commentsService.AddNewComment(blogPostWithComments);
-                    return RedirectToAction("Details", "BlogPosts", new { id = blogPostWithComments.BlogPostValue.Id });
+                    newComment.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    await _commentsService.AddNewComment(newComment);
+                    return RedirectToAction("Details", "BlogPosts", new { id = newComment.BlogPostId });
                 }
 
             }

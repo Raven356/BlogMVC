@@ -7,22 +7,22 @@ namespace BlogMVC.BLL.Services.BlogPostService
 {
     public interface IBlogPostService
     {
-        Task<BlogPost> CreateNewBlogPost(CreateBlogPostDTO request);
+        Task<BlogPost> CreateNewBlogPost(CreateBlogPostDTO request, int categoryId);
 
-        Task DeleteBlogPost(int request);
+        Task DeleteBlogPost(int id);
 
         Task EditBlogPost(EditBlogPostDTO request);
 
-        Task<List<BlogPostDTO>> GetAllBlogPosts(GetBlogPostsDTO request);
+        Task<IEnumerable<BlogPostDTO>> GetAllBlogPosts(BlogPostSearchParametersDTO request);
 
-        Task<AuthorDTO> GetAuthorByUserId(ClaimsPrincipal request);
+        Task<AuthorDTO> GetAuthorByUser(ClaimsPrincipal request);
 
-        Task<GetBlogPostAndCategoryNameByIdDTO> GetBlogPostAndCategoryName(int? request);
+        Task<BlogPostAndCategoryNameDTO> GetBlogPostAndCategoryName(int? id);
 
-        Task<BlogPostWithCommentsDTO> GetBlogPostById(int? request);
+        Task<BlogPostWithCommentsDTO> GetBlogPostById(int? id);
 
-        Task<int> GetCategoryById(BlogPostCreateDTO request);
+        Task<int> GetCategoryId(string categoryName);
 
-        Task<BlogPostDTO> SimpleGetBlogPostById(int? request);
+        Task<BlogPostDTO> SimpleGetBlogPostById(int? id);
     }
 }

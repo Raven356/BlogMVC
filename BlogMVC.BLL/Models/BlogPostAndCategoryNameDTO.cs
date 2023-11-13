@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace BlogMVC.Models
+namespace BlogMVC.BLL.Models
 {
-    public class BlogPostDTO
+    public class BlogPostAndCategoryNameDTO
     {
         public int Id { get; set; }
 
@@ -10,15 +10,11 @@ namespace BlogMVC.Models
 
         public string Text { get; set; } = null!;
 
-        public int CategoryId { get; set; }
-
         [DataType(DataType.Date)]
         public DateTime Date { get; set; }
 
         public int AuthorId { get; set; }
 
-        public AuthorDTO? Author { get; set; }
-
-        public CategoryDTO? Category { get; set; }
+        public string CategoryName { get; set; } = null!;
     }
 }

@@ -31,7 +31,7 @@ namespace BlogMVC.Controllers
         // POST: Authors/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,NickName, UserId")] AuthorDTO author)
+        public async Task<IActionResult> Create(AuthorDTO author)
         {
             if (ModelState.IsValid)
             {

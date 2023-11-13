@@ -1,31 +1,25 @@
-﻿using BlogMVC.BLL.Models;
+﻿using AutoMapper;
+using BlogMVC.BLL.Models;
 using BlogMVC.DAL.Models;
 using BlogMVC.DAL.Repository;
+using Microsoft.EntityFrameworkCore;
 
 namespace BlogMVC.BLL.Services.ControllersService
 {
     public class CommentsService : ICommentsService
     {
         private readonly IRepository<Comment> _commentRepository;
-        private readonly IRepository<User> _userRepository;
+        private readonly IMapper _mapper;
 
-        public CommentsService(IRepository<Comment> commentRepository, IRepository<User> userRepository)
+        public CommentsService(IRepository<Comment> commentRepository, IMapper mapper)
         {
             _commentRepository = commentRepository;
-            _userRepository = userRepository;
+            _mapper = mapper;
         }
 
-        public async Task<BlogPostWithCommentsDTO> AddNewComment(BlogPostWithCommentsDTO request)
+        public async Task AddNewComment(CommentDTO newComment)
         {
-            await _commentRepository.Add(request.NewComment);
-
-            request.CommentList = _commentRepository.GetAll()
-                .Where(c => c.BlogPostId == request.BlogPostValue.Id).ToList();
-
-            request.CommentList.ToList()
-                .ForEach(c => c.User = _userRepository.GetById(c.UserId!).Result);
-
-            return request;
+            await _commentRepository.Add(_mapper.Map<Comment>(newComment));
         }
     }
 }

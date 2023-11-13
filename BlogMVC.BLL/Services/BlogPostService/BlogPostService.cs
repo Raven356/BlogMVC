@@ -37,9 +37,11 @@ namespace BlogMVC.BLL.Services.BlogPostService
             _userManager = userManager;
         }
 
-        public async Task<BlogPost> CreateNewBlogPost(CreateBlogPostDTO request)
+        public async Task<BlogPost> CreateNewBlogPost(CreateBlogPostDTO request, int categoryId)
         {
-            return await _blogPostRepository.Add(_mapper.Map<BlogPost>(request));
+            var newBlog = _mapper.Map<BlogPost>(request);
+            newBlog.CategoryId = categoryId;
+            return await _blogPostRepository.Add(newBlog);
         }
 
         public async Task DeleteBlogPost(int request)
@@ -50,15 +52,17 @@ namespace BlogMVC.BLL.Services.BlogPostService
 
         public async Task EditBlogPost(EditBlogPostDTO request)
         {
-            var blog = await _blogPostRepository.GetById(request.CreateViewModel.Id);
-            _mapper.Map(request, blog);
+            var blog = _mapper.Map<BlogPost>(request);
             await _blogPostRepository.Update(blog);
             return;
         }
 
-        public async Task<List<BlogPostDTO>> GetAllBlogPosts(GetBlogPostsDTO request)
+        public async Task<IEnumerable<BlogPostDTO>> GetAllBlogPosts(BlogPostSearchParametersDTO request)
         {
-            var blogs = _blogPostRepository.GetAll();
+            var blogs = _blogPostRepository.GetAll()
+                .Include(x => x.Author)
+                .Include(x => x.Category)
+                .AsQueryable();
 
             if (!string.IsNullOrEmpty(request.SearchTitle))
             {
@@ -78,72 +82,65 @@ namespace BlogMVC.BLL.Services.BlogPostService
                 blogs = blogs.Where(b => author.Where(a => a.Id == b.AuthorId).First()
                     .NickName!.Contains(request.SearchAuthor));
             }
-
-            await blogs.ForEachAsync(b => b.Author = _authorRepository.GetById(b.AuthorId).Result);
-            await blogs.ForEachAsync(b => b.Category = _categoryRepository.GetById(b.CategoryId).Result);
-            var result = new List<BlogPostDTO>();
-            await blogs.OrderBy(b => b.Title).ForEachAsync(b => result.Add(_mapper.Map<BlogPostDTO>(b)));
+            var result = _mapper.Map<IEnumerable<BlogPostDTO>>(blogs);
             return result;
         }
 
-        public async Task<AuthorDTO> GetAuthorByUserId(ClaimsPrincipal request)
+        public async Task<AuthorDTO> GetAuthorByUser(ClaimsPrincipal request)
         {
             var user = await _userManager.GetUserAsync(request);
             string userId = user.Id;
-            var author = await _authorRepository.GetAll()
-                .Where(a => a.UserId!.Equals(userId)).FirstOrDefaultAsync();
+            var author = await _authorRepository.GetAll().
+                FirstOrDefaultAsync(a => a.UserId!.Equals(userId));
             var result = _mapper.Map<AuthorDTO>(author);
             return result;
         }
 
-        public async Task<GetBlogPostAndCategoryNameByIdDTO>
-            GetBlogPostAndCategoryName(int? request)
+        public async Task<BlogPostAndCategoryNameDTO>
+            GetBlogPostAndCategoryName(int? id)
         {
-            var blogPost = await _blogPostRepository.GetById(request);
+            var blogPost = await _blogPostRepository.GetById(id);
 
             var categoryName = (await _categoryRepository.GetById(blogPost.CategoryId)).Name;
 
-            return new GetBlogPostAndCategoryNameByIdDTO
-            {
-                BlogPost = blogPost,
-                CategoryName = categoryName
-            };
+            var blogPostAndCategoryNameDTO = _mapper.Map<BlogPostAndCategoryNameDTO>(blogPost);
+            blogPostAndCategoryNameDTO.CategoryName = categoryName;
+            return blogPostAndCategoryNameDTO;
         }
 
-        public async Task<BlogPostWithCommentsDTO> GetBlogPostById(int? request)
+        public async Task<BlogPostWithCommentsDTO> GetBlogPostById(int? id)
         {
             var blogPost = await _blogPostRepository.GetAll()
-               .FirstOrDefaultAsync(m => m.Id == request);
-
-            blogPost!.Author = await _authorRepository.GetById(blogPost.AuthorId);
-            blogPost.Category = await _categoryRepository.GetById(blogPost.CategoryId);
+                .Include(b => b.Author)
+                .Include(b => b.Category)
+                .FirstOrDefaultAsync(m => m.Id == id);
 
             var comments = await _commentRepository.GetAll()
-                .Where(c => c.BlogPostId == request).ToListAsync();
+                .Where(c => c.BlogPostId == id).ToListAsync();
 
             comments.ForEach(c => c.User = _userRepository.GetById(c.UserId!).Result);
             BlogPostWithCommentsDTO blogPostWithComments =
                 new BlogPostWithCommentsDTO
                 {
-                    BlogPostValue = blogPost,
-                    CommentList = comments,
-                    NewComment = new Comment()
+                    BlogPostValue = _mapper.Map<BlogPostDTO>(blogPost),
+                    CommentList = _mapper.Map<IEnumerable<CommentDTO>>(comments),
+                    NewComment = new CommentDTO()
                 };
             return blogPostWithComments;
         }
 
-        public async Task<int> GetCategoryById(BlogPostCreateDTO request)
+        public async Task<int> GetCategoryId(string categoryName)
         {
             int categoryId = -1;
             while (categoryId == -1)
             {
                 var category = _categoryRepository.GetAll()
-                    .Where(c => c.Name == request.CategoryName)
+                    .Where(c => c.Name == categoryName)
                     .FirstOrDefault();
 
                 if (category == null)
                 {
-                    await _categoryRepository.Add(new Category { Name = request.CategoryName });
+                    await _categoryRepository.Add(new Category { Name = categoryName });
                 }
                 else
                 {
@@ -153,10 +150,10 @@ namespace BlogMVC.BLL.Services.BlogPostService
             return categoryId;
         }
 
-        public async Task<BlogPostDTO> SimpleGetBlogPostById(int? request)
+        public async Task<BlogPostDTO> SimpleGetBlogPostById(int? id)
         {
             var blogPost = await _blogPostRepository.GetAll()
-                .FirstOrDefaultAsync(m => m.Id == request);
+                .FirstOrDefaultAsync(m => m.Id == id);
             var result = _mapper.Map<BlogPostDTO>(blogPost);
             return result;
         }

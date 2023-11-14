@@ -1,11 +1,10 @@
 ﻿using AutoMapper;
 using BlogMVC.BLL.Models;
+using BlogMVC.BLL.Services.TagsService;
 using BlogMVC.DAL.Models;
 using BlogMVC.DAL.Repository;
 using BlogMVC.Models;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 
 namespace BlogMVC.BLL.Services.BlogPostService
 {
@@ -14,50 +13,54 @@ namespace BlogMVC.BLL.Services.BlogPostService
         private readonly IRepository<BlogPost> _blogPostRepository;
         private readonly IRepository<Category> _categoryRepository;
         private readonly IRepository<Comment> _commentRepository;
-        private readonly IRepository<User> _userRepository;
         private readonly IRepository<Author> _authorRepository;
         private readonly IMapper _mapper;
-        private readonly UserManager<User> _userManager;
+        private readonly ITagsService _tagsService;
 
         public BlogPostService(
+            ITagsService tagsService,
             IRepository<Category> categoryRepository,
             IRepository<Comment> commentRepository,
-            IRepository<User> userRepository,
             IRepository<BlogPost> blogPostRepository,
             IRepository<Author> authorRepository,
-            IMapper mapper,
-            UserManager<User> userManager)
+            IMapper mapper)
         {
             _categoryRepository = categoryRepository;
             _commentRepository = commentRepository;
-            _userRepository = userRepository;
             _blogPostRepository = blogPostRepository;
             _authorRepository = authorRepository;
             _mapper = mapper;
-            _userManager = userManager;
+            _tagsService = tagsService;
         }
 
-        public async Task<BlogPost> CreateNewBlogPost(CreateBlogPostDTO request, int categoryId)
+        public async Task<BlogPostDTO> CreateNew(CreateBlogPostDTO request)
         {
             var newBlog = _mapper.Map<BlogPost>(request);
-            newBlog.CategoryId = categoryId;
-            return await _blogPostRepository.Add(newBlog);
+            newBlog.CategoryId = await GetCategoryId(request.CategoryName);
+            var createdBlog = _mapper.Map<BlogPostDTO>(await _blogPostRepository.Add(newBlog));
+
+            var tags = request.Tags == null ? null
+                : request.Tags.Split(" ", StringSplitOptions.RemoveEmptyEntries).AsEnumerable();
+            await _tagsService.Create(tags, createdBlog.Id);
+            return createdBlog;
         }
 
-        public async Task DeleteBlogPost(int request)
+        public async Task Delete(int request)
         {
             await _blogPostRepository.Delete(request);
-            return;
         }
 
-        public async Task EditBlogPost(EditBlogPostDTO request)
+        public async Task Edit(EditBlogPostDTO request, string categoryName)
         {
+            request.CategoryId = await GetCategoryId(categoryName);
             var blog = _mapper.Map<BlogPost>(request);
+            await _tagsService.Update(request.Tags == null ? null : request.Tags
+                   .Split(" ", StringSplitOptions.RemoveEmptyEntries).ToList()
+                   , (int)blog.Id);
             await _blogPostRepository.Update(blog);
-            return;
         }
 
-        public async Task<IEnumerable<BlogPostDTO>> GetAllBlogPosts(BlogPostSearchParametersDTO request)
+        public async Task<IEnumerable<BlogPostDTO>> GetAll(BlogPostSearchParametersDTO request)
         {
             var blogs = _blogPostRepository.GetAll()
                 .Include(x => x.Author)
@@ -72,90 +75,66 @@ namespace BlogMVC.BLL.Services.BlogPostService
             if (!string.IsNullOrEmpty(request.SearchCategory))
             {
                 var category = _categoryRepository.GetAll();
-                blogs = blogs.Where(b => category.Where(c => c.Id == b.CategoryId).First()
-                    .Name.Contains(request.SearchCategory));
+                blogs = blogs.Where(b => b.Category.Name.Contains(request.SearchCategory));
             }
 
             if (!string.IsNullOrEmpty(request.SearchAuthor))
             {
                 var author = _authorRepository.GetAll();
-                blogs = blogs.Where(b => author.Where(a => a.Id == b.AuthorId).First()
-                    .NickName!.Contains(request.SearchAuthor));
+                blogs = blogs.Where(b => b.Author.NickName.Contains(request.SearchAuthor));
             }
             var result = _mapper.Map<IEnumerable<BlogPostDTO>>(blogs);
             return result;
         }
 
-        public async Task<AuthorDTO> GetAuthorByUser(ClaimsPrincipal request)
+        public async Task<BlogPostDTO> GetById(int? id)
         {
-            var user = await _userManager.GetUserAsync(request);
-            string userId = user.Id;
-            var author = await _authorRepository.GetAll().
-                FirstOrDefaultAsync(a => a.UserId!.Equals(userId));
-            var result = _mapper.Map<AuthorDTO>(author);
-            return result;
-        }
-
-        public async Task<BlogPostAndCategoryNameDTO>
-            GetBlogPostAndCategoryName(int? id)
-        {
-            var blogPost = await _blogPostRepository.GetById(id);
-
-            var categoryName = (await _categoryRepository.GetById(blogPost.CategoryId)).Name;
-
-            var blogPostAndCategoryNameDTO = _mapper.Map<BlogPostAndCategoryNameDTO>(blogPost);
-            blogPostAndCategoryNameDTO.CategoryName = categoryName;
-            return blogPostAndCategoryNameDTO;
-        }
-
-        public async Task<BlogPostWithCommentsDTO> GetBlogPostById(int? id)
-        {
-            var blogPost = await _blogPostRepository.GetAll()
+            var blogPost = _mapper.Map<BlogPostDTO>(await _blogPostRepository.GetAll()
                 .Include(b => b.Author)
                 .Include(b => b.Category)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(m => m.Id == id));
 
-            var comments = await _commentRepository.GetAll()
-                .Where(c => c.BlogPostId == id).ToListAsync();
-
-            comments.ForEach(c => c.User = _userRepository.GetById(c.UserId!).Result);
-            BlogPostWithCommentsDTO blogPostWithComments =
-                new BlogPostWithCommentsDTO
-                {
-                    BlogPostValue = _mapper.Map<BlogPostDTO>(blogPost),
-                    CommentList = _mapper.Map<IEnumerable<CommentDTO>>(comments),
-                    NewComment = new CommentDTO()
-                };
-            return blogPostWithComments;
+            var comments = _mapper
+                .Map<IEnumerable<CommentDTO>>(_commentRepository.GetAll().Include(c => c.User)
+                .Where(c => c.BlogPostId == id).AsEnumerable());
+            
+            blogPost.CommentList = comments;
+            blogPost.Tags = await _tagsService.GetByBlogPostId(blogPost.Id);
+            return blogPost;
         }
 
-        public async Task<int> GetCategoryId(string categoryName)
+        public async Task<IEnumerable<BlogPostDTO>> GetByTag(string tag)
+        {
+            return await _tagsService.GetByTag(tag);
+        }
+
+        public async Task<IEnumerable<BlogPostDTO>> 
+            GetTags(IEnumerable<BlogPostDTO> posts)
+        {
+            foreach (var blog in posts)
+            {
+                blog.Tags = await _tagsService.GetByBlogPostId(blog.Id);
+            }
+            return posts;
+        }
+
+        private async Task<int> GetCategoryId(string categoryName)
         {
             int categoryId = -1;
-            while (categoryId == -1)
-            {
-                var category = _categoryRepository.GetAll()
-                    .Where(c => c.Name == categoryName)
-                    .FirstOrDefault();
+            var category = _categoryRepository.GetAll()
+                .Where(c => c.Name == categoryName)
+                .FirstOrDefault();
 
-                if (category == null)
-                {
-                    await _categoryRepository.Add(new Category { Name = categoryName });
-                }
-                else
-                {
-                    categoryId = category.Id;
-                }
+            if (category == null)
+            {
+                categoryId = (await _categoryRepository.Add(new Category { Name = categoryName })).Id;
+            }
+            else
+            {
+                categoryId = category.Id;
             }
             return categoryId;
         }
 
-        public async Task<BlogPostDTO> SimpleGetBlogPostById(int? id)
-        {
-            var blogPost = await _blogPostRepository.GetAll()
-                .FirstOrDefaultAsync(m => m.Id == id);
-            var result = _mapper.Map<BlogPostDTO>(blogPost);
-            return result;
-        }
     }
 }

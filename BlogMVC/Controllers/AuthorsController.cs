@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using BlogMVC.BLL.Services.AuthorsService;
 using BlogMVC.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BlogMVC.Controllers
 {
-    public class AuthorsController : Controller
+    public class AuthorsController : ControllerBase
     {
         private readonly IAuthorsService _authorsService;
 
@@ -17,7 +17,7 @@ namespace BlogMVC.Controllers
         // GET: Authors/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            var author = await _authorsService.GetAuthorById(id);
+            var author = await _authorsService.GetById(id);
 
             return View(author);
         }
@@ -35,12 +35,23 @@ namespace BlogMVC.Controllers
         {
             if (ModelState.IsValid)
             {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var userId = GetUserId();
                 author.UserId = userId;
-                await _authorsService.CreateAuthor(author);
+                await _authorsService.Create(author);
                 return RedirectToAction("Create", "BlogPosts");
             }
             return View(author);
+        }
+
+        [Authorize]
+        public async Task<IActionResult> CheckForAuthorExistence()
+        {
+            var author = await _authorsService.GetByUser(GetUserId());
+            if (author == null)
+            {
+                return RedirectToAction("Create");
+            }
+            return RedirectToAction("Create", "BlogPosts", new { authorId = author.Id });
         }
     }
 }

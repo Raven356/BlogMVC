@@ -4,7 +4,7 @@ using BlogMVC.BLL.Services.AccountsService;
 using BlogMVC.Models;
 using Microsoft.AspNetCore.Mvc;
 
-public class AccountController : Controller
+public class AccountController : BlogMVC.Controllers.ControllerBase
 {
     private readonly IAccountService _accountService;
     private readonly IMapper _mapper;

@@ -20,11 +20,6 @@ namespace BlogMVC.BLL.Services.AccountsService
             _mapper = mapper;
         }
 
-        public async Task<User> GetUserAsync(ClaimsPrincipal user)
-        {
-            return await _userManager.GetUserAsync(user);
-        }
-
         public async Task<SignInResult> Login(LoginDTO model)
         {
             return await _signInManager

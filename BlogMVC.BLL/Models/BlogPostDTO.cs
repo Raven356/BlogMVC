@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using BlogMVC.BLL.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace BlogMVC.Models
 {
@@ -20,5 +21,9 @@ namespace BlogMVC.Models
         public AuthorDTO? Author { get; set; }
 
         public CategoryDTO? Category { get; set; }
+
+        public IEnumerable<TagsDTO> Tags { get; set; } = Enumerable.Empty<TagsDTO>();
+
+        public IEnumerable<CommentDTO> CommentList { get; set; } = null!;
     }
 }

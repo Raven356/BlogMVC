@@ -4,6 +4,6 @@ namespace BlogMVC.BLL.Services.ControllersService
 {
     public interface ICommentsService
     {
-        public Task AddNewComment(CommentDTO newComment);
+        public Task AddNew(CommentDTO newComment);
     }
 }

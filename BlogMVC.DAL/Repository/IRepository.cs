@@ -10,8 +10,6 @@
 
         IQueryable<TEntity> GetAll();
 
-        Task<TEntity> GetById(int? id);
-
-        Task<TEntity> GetById(string id);
+        Task<TEntity> GetById(object id);
     }
 }

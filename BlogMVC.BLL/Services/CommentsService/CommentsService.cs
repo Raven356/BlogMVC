@@ -2,7 +2,6 @@
 using BlogMVC.BLL.Models;
 using BlogMVC.DAL.Models;
 using BlogMVC.DAL.Repository;
-using Microsoft.EntityFrameworkCore;
 
 namespace BlogMVC.BLL.Services.ControllersService
 {
@@ -17,7 +16,7 @@ namespace BlogMVC.BLL.Services.ControllersService
             _mapper = mapper;
         }
 
-        public async Task AddNewComment(CommentDTO newComment)
+        public async Task AddNew(CommentDTO newComment)
         {
             await _commentRepository.Add(_mapper.Map<Comment>(newComment));
         }

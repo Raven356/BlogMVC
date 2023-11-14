@@ -2,11 +2,10 @@
 using BlogMVC.BLL.Services.ControllersService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace BlogMVC.Controllers
 {
-    public class CommentsController : Controller
+    public class CommentsController : ControllerBase
     {
         private readonly ICommentsService _commentsService;
 
@@ -24,8 +23,8 @@ namespace BlogMVC.Controllers
             {
                 if (!string.IsNullOrEmpty(newComment.Text))
                 {
-                    newComment.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                    await _commentsService.AddNewComment(newComment);
+                    newComment.UserId = GetUserId();
+                    await _commentsService.AddNew(newComment);
                     return RedirectToAction("Details", "BlogPosts", new { id = newComment.BlogPostId });
                 }
 

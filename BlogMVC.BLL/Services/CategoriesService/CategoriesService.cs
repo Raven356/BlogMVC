@@ -17,7 +17,7 @@ namespace BlogMVC.BLL.Services.CategoriesService
             _mapper = mapper;
         }
 
-        public async Task<CategoryDTO> GetCategoryById(int? id)
+        public async Task<CategoryDTO> GetById(int? id)
         {
             var category = await _categoryRepository.GetAll()
                 .FirstOrDefaultAsync(m => m.Id == id);

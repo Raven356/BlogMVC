@@ -29,8 +29,6 @@ namespace BlogMVC.BLL
             CreateMap<CommentDTO, Comment>()
                 .ForMember(dst => dst.BlogPost, opt => opt.Ignore())
                 .ReverseMap();
-            CreateMap<BlogPost, BlogPostAndCategoryNameDTO>()
-                .ForMember(dst => dst.CategoryName, opt => opt.Ignore());
         }
     }
 }

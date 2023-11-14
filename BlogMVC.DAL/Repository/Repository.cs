@@ -39,7 +39,7 @@ namespace BlogMVC.DAL.Repository
             return _dbSet;
         }
 
-        public async Task<TEntity> GetById(int? id)
+        public async Task<TEntity> GetById(object id)
         {
             return (await _dbSet.FindAsync(id))!;
         }
@@ -67,11 +67,6 @@ namespace BlogMVC.DAL.Repository
         {
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
-        }
-
-        public async Task<TEntity> GetById(string id)
-        {
-            return (await _dbSet.FindAsync(id))!;
         }
     }
 }

@@ -1,28 +1,22 @@
 ﻿using BlogMVC.BLL.Models;
-using BlogMVC.DAL.Models;
 using BlogMVC.Models;
-using System.Security.Claims;
 
 namespace BlogMVC.BLL.Services.BlogPostService
 {
     public interface IBlogPostService
     {
-        Task<BlogPost> CreateNewBlogPost(CreateBlogPostDTO request, int categoryId);
+        Task<BlogPostDTO> CreateNew(CreateBlogPostDTO request);
 
-        Task DeleteBlogPost(int id);
+        Task Delete(int id);
 
-        Task EditBlogPost(EditBlogPostDTO request);
+        Task Edit(EditBlogPostDTO request, string categoryName);
 
-        Task<IEnumerable<BlogPostDTO>> GetAllBlogPosts(BlogPostSearchParametersDTO request);
+        Task<IEnumerable<BlogPostDTO>> GetAll(BlogPostSearchParametersDTO request);
 
-        Task<AuthorDTO> GetAuthorByUser(ClaimsPrincipal request);
+        Task<BlogPostDTO> GetById(int? id);
 
-        Task<BlogPostAndCategoryNameDTO> GetBlogPostAndCategoryName(int? id);
+        Task<IEnumerable<BlogPostDTO>> GetTags(IEnumerable<BlogPostDTO> posts);
 
-        Task<BlogPostWithCommentsDTO> GetBlogPostById(int? id);
-
-        Task<int> GetCategoryId(string categoryName);
-
-        Task<BlogPostDTO> SimpleGetBlogPostById(int? id);
+        Task<IEnumerable<BlogPostDTO>> GetByTag(string tag);
     }
 }

@@ -2,6 +2,7 @@
 using BlogMVC.DAL.Models;
 using BlogMVC.DAL.Repository;
 using BlogMVC.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace BlogMVC.BLL.Services.AuthorsService
 {
@@ -18,19 +19,27 @@ namespace BlogMVC.BLL.Services.AuthorsService
             _mapper = mapper;
         }
 
-        public async Task CreateAuthor(AuthorDTO request)
+        public async Task Create(AuthorDTO request)
         {
             var author = _mapper.Map<Author>(request);
             await _repository.Add(author);
             return;
         }
 
-        public async Task<AuthorDTO> GetAuthorById(int? id)
+        public async Task<AuthorDTO> GetById(int? id)
         {
             var author = await _repository.GetById(id);
 
             author.User = await _userRepository.GetById(author.UserId);
 
+            var result = _mapper.Map<AuthorDTO>(author);
+            return result;
+        }
+
+        public async Task<AuthorDTO> GetByUser(string userId)
+        {
+            var author = await _repository.GetAll().
+                FirstOrDefaultAsync(a => a.UserId!.Equals(userId));
             var result = _mapper.Map<AuthorDTO>(author);
             return result;
         }

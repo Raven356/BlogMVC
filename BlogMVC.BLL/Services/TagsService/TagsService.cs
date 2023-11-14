@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BlogMVC.BLL.Models;
 using BlogMVC.DAL.Models;
 using BlogMVC.DAL.Repository;
 using BlogMVC.Models;
@@ -23,7 +24,7 @@ namespace BlogMVC.BLL.Services.TagsService
             _mapper = mapper;
         }
 
-        public async Task CreateTags(IEnumerable<string> tags, int blogId)
+        public async Task Create(IEnumerable<string> tags, int blogId)
         {
             if (tags == null)
             {
@@ -46,7 +47,7 @@ namespace BlogMVC.BLL.Services.TagsService
             }
         }
 
-        public async Task UpdateTags(IEnumerable<string> tags, int blogId)
+        public async Task Update(IEnumerable<string> tags, int blogId)
         {
             if (tags == null || tags.Count() <= 0)
             {
@@ -92,15 +93,15 @@ namespace BlogMVC.BLL.Services.TagsService
 
         }
 
-        public async Task<IEnumerable<Tags>> GetTagsByBlogPostId(int? id)
+        public async Task<IEnumerable<TagsDTO>> GetByBlogPostId(int? id)
         {
             var tagToBlogPost = _tagsToBlogPostRepository.GetAll().Where(t => t.BlogPostId == id);
             var tags = _tagsRepository.GetAll()
                 .Where(t => tagToBlogPost.Select(tb => tb.TagId).Contains(t.Id));
-            return await tags.ToListAsync();
+            return _mapper.Map<IEnumerable<TagsDTO>>(tags);
         }
 
-        public async Task<IEnumerable<BlogPostDTO>> GetBlogPostsByTag(string tag)
+        public async Task<IEnumerable<BlogPostDTO>> GetByTag(string tag)
         {
             var tags = await _tagsRepository.GetAll()
                 .Where(t => t.Name == tag).FirstAsync();

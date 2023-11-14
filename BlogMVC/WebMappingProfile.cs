@@ -14,11 +14,7 @@ namespace BlogMVC
             CreateMap<EditBlogPostViewModel, EditBlogPostDTO>()
                 .ForMember(d => d.CategoryId, opt => opt.Ignore());
             CreateMap<BlogPostDTO, EditBlogPostViewModel>()
-                .ForMember(d => d.CategoryName, opt => opt.Ignore());
-            CreateMap<BlogPostAndCategoryNameDTO, EditBlogPostViewModel>();
-            CreateMap<BlogPostWithCommentsViewModel, BlogPostWithCommentsDTO>()
-                .ReverseMap()
-                .ForMember(d => d.IsAuthor, opt => opt.Ignore());
+                .ForMember(d => d.CategoryName, opt => opt.MapFrom(s => s.Category.Name));
         }
     }
 }

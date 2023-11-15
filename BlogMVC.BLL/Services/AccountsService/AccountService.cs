@@ -3,7 +3,6 @@ using BlogMVC.BLL.Models;
 using BlogMVC.DAL.Models;
 using BlogMVC.Models;
 using Microsoft.AspNetCore.Identity;
-using System.Security.Claims;
 
 namespace BlogMVC.BLL.Services.AccountsService
 {

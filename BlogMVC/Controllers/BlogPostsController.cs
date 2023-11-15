@@ -60,9 +60,8 @@ namespace BlogMVC.Controllers
 
         // GET: BlogPosts/Create
         [Authorize]
-        public async Task<IActionResult> Create(int authorId)
+        public IActionResult Create(int authorId)
         {
-           
             return View(new CreateBlogPostDTO { AuthorId = authorId });
         }
 
@@ -73,7 +72,6 @@ namespace BlogMVC.Controllers
         {
             if (ModelState.IsValid)
             {
-                
                 await _blogPostService.CreateNew(blogPost);
                 return RedirectToAction("Index", "BlogPosts");
             }
